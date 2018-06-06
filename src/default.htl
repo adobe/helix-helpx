@@ -35,7 +35,7 @@
                             Last updated 6 days ago
                         </div>
                     </div>
-                    <div data-sly-list="${it.children}"><sly data-sly-test="${!itemList.first}">${item}</sly></div>
+                    <div data-sly-list="${it.children}">${item}</div>
                 </div>
             </div>
         </div>

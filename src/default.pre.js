@@ -3,6 +3,7 @@ module.exports.main = function (ctx) {
     console.log('IN PRE: ', ctx.resource);
     ctx.resource = ctx.resource || {};
     ctx.resource.metadata = METADATA;
+    delete ctx.resource.children[0];
     //return Promise.resolve(ctx);
 };
 
