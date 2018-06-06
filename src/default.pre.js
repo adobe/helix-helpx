@@ -16,7 +16,7 @@ module.exports.main = function (ctx) {
         }
     }
 
-    ctx.committers = committers;
+    ctx.resource.committers = committers;
     //return Promise.resolve(ctx);
 };
 
