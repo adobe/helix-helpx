@@ -100,10 +100,21 @@ h1 {
 }
 
 .author img {
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 128px;
     width: 30px;
+    height: 30px;
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 500;
+    z-index: 0;
+    box-shadow: 0 0 0 2px #fff;
 }
 
 .author {
-    font-size: 1em;
     color: #888;
+    font-size: 12px;
+    line-height: 1.625;
+    font-weight: 400;
 }
