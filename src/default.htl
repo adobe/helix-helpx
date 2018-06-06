@@ -32,7 +32,7 @@
                         <h1>${it.title}</h1>
                         <div class="author">
                              <sly data-sly-list="${it.committers}"><img src="${item}"></sly>
-                            Last updated 6 days ago
+                            ${it.lastModified.display}
                         </div>
                     </div>
                     <div data-sly-list="${it.children}">${item}</div>

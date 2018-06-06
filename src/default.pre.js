@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 module.exports.main = function (ctx) {
     try {
         // TODO: remove temp solution - WIP
@@ -20,6 +22,11 @@ module.exports.main = function (ctx) {
         }
         console.log('IN PRE committers: ', committers);
         ctx.resource.committers = committers;
+        ctx.resource.lastModified = {
+            'raw': lastmod,
+            'display': moment(lastmod).fromNow()
+        };
+
         //return Promise.resolve(ctx);
     } catch(error) {
         console.error('IN PRE ERROR', error);
