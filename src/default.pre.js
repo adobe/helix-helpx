@@ -1,5 +1,7 @@
 module.exports.main = function (ctx) {
     // TODO: remove temp solution - WIP
+    console.log('IN PRE: ', ctx.resource);
+    ctx.resource = ctx.resource || {};
     ctx.resource.metadata = METADATA;
     //return Promise.resolve(ctx);
 };
