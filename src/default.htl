@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />    
+      <link rel="stylesheet" href="styles.css"/>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700"/>
+    </head>
+
+    <body>
+        <div class="header">
+            <h1><img src="adobe-logo.png"/>Launch, by Adobe, Documentation</h1>
+        </div>
+        <div class="main">
+            <div class="nav">
+                <ul>
+                    <li>Getting Started
+                        <ul>
+                            <li>Release Notes</li>
+                            <li>Videos</li>
+                        </ul>
+                    </li>
+                    <li>Managing Resources</li>
+                    <li>Publishing</li>
+                    <li>Client-side Information</li>
+                    <li>Administration</li>
+                    <li>Extension Reference</li>
+                </ul>
+            </div>
+            <div class="content">
+                <div class="content-body">
+                    <div class="title">
+                        <h1>${it.title}</h1>
+                        <div class="author">
+                             <sly data-sly-list="${it.metadata}"><img src="${item.author.avatar_url}"></sly>
+                            Last updated 6 days ago
+                        </div>
+                    </div>
+                    <div data-sly-list="${it.children}"><sly data-sly-test="${!itemList.first}">${item}</sly></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
