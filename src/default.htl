@@ -31,7 +31,7 @@
                     <div class="title">
                         <h1>${it.title}</h1>
                         <div class="author">
-                             <sly data-sly-list="${it.metadata}"><img src="${item.author.avatar_url}"></sly>
+                             <sly data-sly-list="${it.committers}"><img src="${item}"></sly>
                             Last updated 6 days ago
                         </div>
                     </div>

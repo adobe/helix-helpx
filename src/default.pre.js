@@ -4,6 +4,19 @@ module.exports.main = function (ctx) {
     ctx.resource = ctx.resource || {};
     ctx.resource.metadata = METADATA;
     delete ctx.resource.children[0];
+
+    const metalen = METADATA.length;
+    const committers = [];
+    const lastmod = METADATA[0].commit.author.date;
+
+    for (let i = 0; i < metalen; i++) {
+        const commit = METADATA[i];
+        if (!committers.contains(commit.author.avatar_url)) {
+            committers.push(commit.author.avatar_url);
+        }
+    }
+
+    ctx.committers = committers;
     //return Promise.resolve(ctx);
 };
 
@@ -400,3 +413,4 @@ const METADATA = [
         ]
     }
 ]
+
