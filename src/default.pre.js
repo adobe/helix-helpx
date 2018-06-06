@@ -1,25 +1,29 @@
 module.exports.main = function (ctx) {
-    // TODO: remove temp solution - WIP
+    try {
+        // TODO: remove temp solution - WIP
 
-    ctx.resource = ctx.resource || {};
-    ctx.resource.metadata = METADATA;
-    delete ctx.resource.children[0];
+        ctx.resource = ctx.resource || {};
+        ctx.resource.metadata = METADATA;
+        delete ctx.resource.children[0];
 
-    const metalen = METADATA.length;
-    const committers = [];
-    const lastmod = METADATA[0].commit.author.date;
+        const metalen = METADATA.length;
+        const committers = [];
+        const lastmod = METADATA[0].commit.author.date;
 
-    
-    for (let i = 0; i < metalen; i++) {
-        const commit = METADATA[i];
-        console.log('IN PRE: ', commit);
-        if (!committers.contains(commit.author.avatar_url)) {
-            committers.push(commit.author.avatar_url);
+        
+        for (let i = 0; i < metalen; i++) {
+            const commit = METADATA[i];
+            console.log('IN PRE: ', commit.author.avatar_url);
+            if (committers.indexOf(commit.author.avatar_url) < 0) {
+                committers.push(commit.author.avatar_url);
+            }
         }
+        console.log('IN PRE committers: ', committers);
+        ctx.resource.committers = committers;
+        //return Promise.resolve(ctx);
+    } catch(error) {
+        console.error('IN PRE ERROR', error);
     }
-    console.log('IN PRE committers: ', committers);
-    ctx.resource.committers = committers;
-    //return Promise.resolve(ctx);
 };
 
 const METADATA = [
