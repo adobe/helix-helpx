@@ -30,8 +30,8 @@
                 <div class="content-body">
                     <div class="title">
                         <h1>${it.title}</h1>
-                        <div data-sly-test="${it.committers}">committers: ${it.committers}</div>
-                        <div data-sly-test="${it.lastModified}">lastModified: ${it.lastModified}</div>
+                         committers: <div data-sly-test="${it.committers}">${it.committers}</div>
+                         lastModified: <div data-sly-test="${it.lastModified}">${it.lastModified}</div>
                         <div data-sly-test="${it.committers && it.lastModified}" class="author">
                              <sly data-sly-list="${it.committers}"><img src="${item}"></sly>
                             Last modified ${it.lastModified.display}
