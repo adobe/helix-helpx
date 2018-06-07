@@ -1,36 +1,62 @@
 const moment = require('moment');
 
-module.exports.main = function (ctx) {
-    try {
-        // TODO: remove temp solution - WIP
+/**
+ * Removes the first title from the resource children
+ * @param {RequestContext} ctx Context
+ */
+function removeFirstTitle(ctx) {
+    delete ctx.resource.children[0];
+};
 
-        ctx.resource = ctx.resource || {};
-        ctx.resource.metadata = METADATA;
-        delete ctx.resource.children[0];
+/**
+ * Collects the resource metadata and appends them to the resource
+ * @param {RequestContext} ctx Context
+ */
+function collectMetadata(ctx) {
+    // TODO: remove temp solution - WIP
+    ctx.resource.metadata = METADATA;
+};
 
-        const metalen = METADATA.length;
-        const committers = [];
-        const lastmod = METADATA[0].commit.author.date;
+/**
+ * Extracts some committers data from the list of commits and appends the list to the resource
+ * @param {RequestContext} ctx Context
+ */
+function extractCommittersFromMetadata(ctx) {
+    const metadata = ctx.resource.metadata || [];
+    const committers = [];
 
-        
-        for (let i = 0; i < metalen; i++) {
-            const commit = METADATA[i];
-            console.log('IN PRE: ', commit.author.avatar_url);
-            if (committers.indexOf(commit.author.avatar_url) < 0) {
-                committers.push(commit.author.avatar_url);
-            }
+    for (let i = 0; i < metadata.length; i++) {
+        const commit = metadata[i];
+        if (commit.author && committers.indexOf(commit.author.avatar_url) < 0) {
+            committers.push(commit.author.avatar_url);
         }
-        console.log('IN PRE committers: ', committers);
-        ctx.resource.committers = committers;
-        ctx.resource.lastModified = {
-            'raw': lastmod,
-            'display': moment(lastmod).fromNow()
-        };
-
-        //return Promise.resolve(ctx);
-    } catch(error) {
-        console.error('IN PRE ERROR', error);
     }
+
+    ctx.resource.committers = committers;
+};
+
+/**
+ * Extracts the last modified data of the resource and appends it to the resource
+ * @param {RequestContext} ctx Context
+ */
+function extractLastModifiedFromMetadata(ctx) {
+    const metadata = ctx.resource.metadata || [];
+    const lastMod = metadata.length > 0 ? metadata[0].commit.author.date : null;
+
+    ctx.resource.lastModified = {
+        'raw': lastMod,
+        'display': lastMod ? moment(lastMod).fromNow() : 'Unknown';
+    };
+;}
+
+module.exports.main = function (ctx) {
+    ctx.resource = ctx.resource || {};
+    
+    removeFirstTitle(ctx);
+    collectMetadata(ctx);
+
+    extractCommittersFromMetadata(ctx);
+    extractLastModifiedFromMetadata(ctx);
 };
 
 const METADATA = [
