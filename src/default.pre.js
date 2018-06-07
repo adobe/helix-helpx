@@ -43,8 +43,11 @@ function extractCommittersFromMetadata(ctx) {
 
     for (let i = 0; i < metadata.length; i++) {
         const commit = metadata[i];
-        if (commit.author && committers.indexOf(commit.author.avatar_url) < 0) {
-            committers.push(commit.author.avatar_url);
+        if (commit.author && committers.map(item => { return e.avatar_url; }).indexOf(commit.author.avatar_url) < 0) {
+            committers.push({
+                avatar_url: commit.author.avatar_url,
+                display: commit.commit.author.name + ' ' + commit.commit.author.email
+            });
         }
     }
 
