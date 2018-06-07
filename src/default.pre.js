@@ -19,7 +19,7 @@ function collectMetadata(ctx) {
         uri:
             ctx.strandConfig.content.api + 
             '/commits?path=' + 
-            ctx.resourcePath.substring(1) +
+            ctx.resourcePath +
             '.md',
         headers: {
             'User-Agent': 'Request-Promise'
