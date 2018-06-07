@@ -45,7 +45,7 @@ function extractLastModifiedFromMetadata(ctx) {
 
     ctx.resource.lastModified = {
         'raw': lastMod,
-        'display': lastMod ? moment(lastMod).fromNow() : 'Unknown';
+        'display': lastMod ? moment(lastMod).fromNow() : 'Unknown'
     };
 ;}
 
