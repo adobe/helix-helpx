@@ -1,2 +1,2 @@
 # helix-helpx
-Content for HelpX
+Code for HelpX
