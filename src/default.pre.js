@@ -27,10 +27,8 @@ function collectMetadata(ctx) {
         json: true
     };
 
-    console.log('collectMetadata is requesting ', options.uri);
     return request(options).then(metadata => {
         ctx.resource.metadata = metadata;
-        console.log('collectMetadata gathered the metadata ', metadata);
         return Promise.resolve(ctx);
     });
 };
@@ -42,7 +40,7 @@ function collectMetadata(ctx) {
 function extractCommittersFromMetadata(ctx) {
     const metadata = ctx.resource.metadata || [];
     const committers = [];
-    debugger;
+
     for (let i = 0; i < metadata.length; i++) {
         const commit = metadata[i];
         if (commit.author && committers.indexOf(commit.author.avatar_url) < 0) {
@@ -60,8 +58,7 @@ function extractCommittersFromMetadata(ctx) {
  */
 function extractLastModifiedFromMetadata(ctx) {
     const metadata = ctx.resource.metadata || [];
-    debugger;
-    console.log('extractLastModifiedFromMetadata', metadata);
+
     const lastMod = metadata.length > 0 && metadata[0].commit && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
     ctx.resource.lastModified = {
