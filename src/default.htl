@@ -31,7 +31,7 @@
                     <div class="title">
                         <h1>${it.title}</h1>
                          <div data-sly-test="${it.committers && it.lastModified}" class="author">
-                             <sly data-sly-list="${it.committers}"><img aria-label="${item.display}" src="${item.avatar_url}"></sly>
+                             <sly data-sly-list="${it.committers}"><img title="${item.display}" src="${item.avatar_url}"></sly>
                             Last modified ${it.lastModified.display}
                         </div>
                     </div>

@@ -46,7 +46,7 @@ function extractCommittersFromMetadata(ctx) {
         if (commit.author && committers.map(item => { return item.avatar_url; }).indexOf(commit.author.avatar_url) < 0) {
             committers.push({
                 avatar_url: commit.author.avatar_url,
-                display: commit.commit.author.name + ' ' + commit.commit.author.email
+                display: commit.commit.author.name + ' | ' + commit.commit.author.email
             });
         }
     }
