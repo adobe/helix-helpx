@@ -17,7 +17,7 @@ function removeFirstTitle(ctx) {
 function collectMetadata(ctx) {
     // TODO: remove temp solution - WIP
 
-    let uri = ctx.strainConfig.content.api + '/commits?path=' + ctx.resourcePath + '.md';
+    let uri = ctx.strainConfig.content.api + '/commits?path=' + ctx.resourcePath.substring(1) + '.md';
     console.log('collectMetadata is requesting ', uri);
     return request(uri).then(metadata => {
         ctx.resource.metadata = metadata;
