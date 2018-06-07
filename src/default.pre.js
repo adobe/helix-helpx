@@ -27,6 +27,7 @@ function collectMetadata(ctx) {
         json: true
     };
 
+    console.debug('Fetching...', options.uri);
     return request(options).then(metadata => {
         ctx.resource.metadata = metadata;
         return Promise.resolve(ctx);
