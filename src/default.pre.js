@@ -17,7 +17,7 @@ function removeFirstTitle(ctx) {
 function collectMetadata(ctx) {
     const options = {
         uri:
-            ctx.strainConfig.content.api + 
+            ctx.strandConfig.content.api + 
             '/commits?path=' + 
             ctx.resourcePath.substring(1) +
             '.md',
