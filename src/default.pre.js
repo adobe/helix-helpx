@@ -50,7 +50,8 @@ function extractCommittersFromMetadata(ctx) {
  */
 function extractLastModifiedFromMetadata(ctx) {
     const metadata = ctx.resource.metadata || [];
-    const lastMod = metadata.length > 0 ? metadata[0].commit.author.date : null;
+    console.log('extractLastModifiedFromMetadata', metadata);
+    const lastMod = metadata.length > 0 && metadata[0].commit && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
     ctx.resource.lastModified = {
         'raw': lastMod,
