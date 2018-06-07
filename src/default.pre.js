@@ -15,10 +15,19 @@ function removeFirstTitle(ctx) {
  * @param {RequestContext} ctx Context
  */
 function collectMetadata(ctx) {
-    // TODO: remove temp solution - WIP
+    const options = {
+        uri:
+            ctx.strainConfig.content.api + 
+            '/commits?path=' + 
+            ctx.resourcePath.substring(1) +
+            '.md',
+        headers: {
+            'User-Agent': 'Request-Promise'
+        },
+        json: true
+    };
 
-    let uri = ctx.strainConfig.content.api + '/commits?path=' + ctx.resourcePath.substring(1) + '.md';
-    console.log('collectMetadata is requesting ', uri);
+    console.log('collectMetadata is requesting ', options.uri);
     return request(uri).then(metadata => {
         ctx.resource.metadata = metadata;
         console.log('collectMetadata gathered the metadata ', metadata);
