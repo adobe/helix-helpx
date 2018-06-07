@@ -74,7 +74,7 @@ function extractLastModifiedFromMetadata(ctx) {
 module.exports.main = function (ctx) {
     ctx.resource = ctx.resource || {};
     
-    Promise.resolve(ctx)
+    return Promise.resolve(ctx)
         .then(removeFirstTitle)
         .then(collectMetadata)
         .then(extractCommittersFromMetadata)
