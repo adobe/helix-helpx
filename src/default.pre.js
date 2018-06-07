@@ -42,7 +42,7 @@ function collectMetadata(ctx) {
 function extractCommittersFromMetadata(ctx) {
     const metadata = ctx.resource.metadata || [];
     const committers = [];
-
+    debugger;
     for (let i = 0; i < metadata.length; i++) {
         const commit = metadata[i];
         if (commit.author && committers.indexOf(commit.author.avatar_url) < 0) {
