@@ -28,7 +28,7 @@ function collectMetadata(ctx) {
     };
 
     console.log('collectMetadata is requesting ', options.uri);
-    return request(uri).then(metadata => {
+    return request(options).then(metadata => {
         ctx.resource.metadata = metadata;
         console.log('collectMetadata gathered the metadata ', metadata);
         return Promise.resolve(ctx);
