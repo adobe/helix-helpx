@@ -7,7 +7,7 @@ const request = require('request-promise');
  */
 function removeFirstTitle(ctx) {
     delete ctx.resource.children[0];
-    return ctx;
+    return Promise.resolve(ctx);
 };
 
 /**
@@ -21,7 +21,7 @@ function collectMetadata(ctx) {
     console.log('collectMetadata is requesting ', uri);
     return request(uri).then(metadata => {
         ctx.resource.metadata = metadata;
-        return ctx;
+        return Promise.resolve(ctx);
     });
 };
 
@@ -41,7 +41,7 @@ function extractCommittersFromMetadata(ctx) {
     }
 
     ctx.resource.committers = committers;
-    return ctx;
+    return Promise.resolve(ctx);
 };
 
 /**
@@ -56,7 +56,7 @@ function extractLastModifiedFromMetadata(ctx) {
         'raw': lastMod,
         'display': lastMod ? moment(lastMod).fromNow() : 'Unknown'
     };
-    return ctx;
+    return Promise.resolve(ctx);
 ;}
 
 module.exports.main = function (ctx) {
