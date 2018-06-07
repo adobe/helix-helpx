@@ -21,6 +21,7 @@ function collectMetadata(ctx) {
     console.log('collectMetadata is requesting ', uri);
     return request(uri).then(metadata => {
         ctx.resource.metadata = metadata;
+        console.log('collectMetadata gathered the metadata ', metadata);
         return Promise.resolve(ctx);
     });
 };
@@ -50,6 +51,7 @@ function extractCommittersFromMetadata(ctx) {
  */
 function extractLastModifiedFromMetadata(ctx) {
     const metadata = ctx.resource.metadata || [];
+    debugger;
     console.log('extractLastModifiedFromMetadata', metadata);
     const lastMod = metadata.length > 0 && metadata[0].commit && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
