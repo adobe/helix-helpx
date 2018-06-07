@@ -17,7 +17,7 @@ function removeFirstTitle(ctx) {
 function collectMetadata(ctx) {
     // TODO: remove temp solution - WIP
 
-    let uri = ctx.straintConfig.content.replace('://', '://api');
+    let uri = ctx.strainConfig.content.replace('://', '://api');
     return request(uri).then(metadata => {
         ctx.resource.metadata = metadata;
         return ctx;
