@@ -12,19 +12,7 @@
         </div>
         <div class="main">
             <div class="nav">
-                <ul>
-                    <li>Getting Started
-                        <ul>
-                            <li>Release Notes</li>
-                            <li>Videos</li>
-                        </ul>
-                    </li>
-                    <li>Managing Resources</li>
-                    <li>Publishing</li>
-                    <li>Client-side Information</li>
-                    <li>Administration</li>
-                    <li>Extension Reference</li>
-                </ul>
+                <div data-sly-test="${it.nav}" data-sly-list="${it.nav}">${item}</div>
             </div>
             <div class="content">
                 <div class="content-body">

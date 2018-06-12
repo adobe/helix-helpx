@@ -57,19 +57,33 @@ h1 {
     color: #aaa;
 }
 
+.nav ul li ul a {
+    list-style: none;
+    color: #aaa;
+}
 
-.nav ul li.open {
+.nav a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav ul li.open, .nav ul li.open a {
     list-style-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="xMidYMid meet" height="1em" width="1em" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" class="_13gjrqj"><g><polyline points="6 9 12 15 18 9"></polyline></g></svg>');
 }
 
-.nav ul li.selected {
+.nav ul li.selected, .nav ul li.selected a {
     color: #e00;
 }
 
-.nav ul li {
+.nav ul li, .nav ul li a {
     padding-top: 5px;
     padding-bottom: 5px;
-    
+}
+
+.nav ul li p {
+    font-size: 16px;
+    line-height: 1.5em;
+    margin: 0;
 }
 
 .content {
