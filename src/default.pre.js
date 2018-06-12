@@ -18,7 +18,9 @@ function removeFirstTitle(ctx) {
 function collectMetadata(ctx) {
     const options = {
         uri:
-            ctx.strandConfig.content.api + 
+            ctx.strandConfig.urls.content.apiRoot + 
+            '/repos/' +
+            ctx.strandConfig.urls.content.repo +
             '/commits?path=' + 
             ctx.resourcePath +
             '.md',
@@ -41,9 +43,9 @@ function collectMetadata(ctx) {
  */
 function collectNav(ctx) {
     const params = {
-        org: ctx.strandConfig.content.org,
-        repo: ctx.strandConfig.content.repo,
-        tree: ctx.strandConfig.content.tree,
+        org: ctx.strandConfig.urls.content.owner,
+        repo: ctx.strandConfig.urls.content.name,
+        tree: ctx.strandConfig.urls.content.ref,
         path: 'SUMMARY.md'
     };
 
