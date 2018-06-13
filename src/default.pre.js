@@ -20,7 +20,7 @@ function collectMetadata(ctx) {
         uri:
             ctx.strandConfig.urls.content.apiRoot + 
             '/repos/' +
-            ctx.strandConfig.urls.content.repo +
+            ctx.strandConfig.urls.content.ownerAndRepos +
             '/commits?path=' + 
             ctx.resourcePath +
             '.md',
