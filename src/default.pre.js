@@ -18,9 +18,9 @@ function removeFirstTitle(ctx) {
 function collectMetadata(ctx) {
     const options = {
         uri:
-            ctx.strandConfig.urls.content.apiRoot + 
+            ctx.strainConfig.urls.content.apiRoot + 
             '/repos/' +
-            ctx.strandConfig.urls.content.ownerAndRepos +
+            ctx.strainConfig.urls.content.ownerAndRepos +
             '/commits?path=' + 
             ctx.resourcePath +
             '.md',
@@ -43,9 +43,9 @@ function collectMetadata(ctx) {
  */
 function collectNav(ctx) {
     const params = {
-        org: ctx.strandConfig.urls.content.owner,
-        repo: ctx.strandConfig.urls.content.name,
-        tree: ctx.strandConfig.urls.content.ref,
+        org: ctx.strainConfig.urls.content.owner,
+        repo: ctx.strainConfig.urls.content.name,
+        tree: ctx.strainConfig.urls.content.ref,
         path: 'SUMMARY.md'
     };
 
@@ -57,7 +57,7 @@ function collectNav(ctx) {
         // link re-writing
         // TODO: move into md2json + parameters
         ctx.resource.nav = nav.map(element => {
-            return element.replace(new RegExp('href="', 'g'), 'href="/' + ctx.strand + '/');
+            return element.replace(new RegExp('href="', 'g'), 'href="/' + ctx.strain + '/');
         });
         return Promise.resolve(ctx);
     });
