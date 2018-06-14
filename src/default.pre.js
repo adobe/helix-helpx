@@ -34,7 +34,9 @@ function collectMetadata(ctx) {
             ctx.strainConfig.urls.content.repo +
             '/commits?path=' + 
             ctx.resourcePath +
-            '.md',
+            '.md' +
+            '&sha=' +
+            ctx.strainConfig.urls.content.ref,
         headers: {
             'User-Agent': 'Request-Promise'
         },
