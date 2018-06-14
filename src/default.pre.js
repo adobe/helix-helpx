@@ -20,7 +20,9 @@ function collectMetadata(ctx) {
         uri:
             ctx.strainConfig.urls.content.apiRoot + 
             '/repos/' +
-            ctx.strainConfig.urls.content.ownerAndRepos +
+            ctx.strainConfig.urls.content.owner +
+            '/' +
+            ctx.strainConfig.urls.content.repo +
             '/commits?path=' + 
             ctx.resourcePath +
             '.md',
@@ -44,7 +46,7 @@ function collectMetadata(ctx) {
 function collectNav(ctx) {
     const params = {
         org: ctx.strainConfig.urls.content.owner,
-        repo: ctx.strainConfig.urls.content.name,
+        repo: ctx.strainConfig.urls.content.repo,
         tree: ctx.strainConfig.urls.content.ref,
         path: 'SUMMARY.md'
     };
