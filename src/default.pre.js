@@ -3,6 +3,15 @@ const request = require('request-promise');
 const md2json = require('md2json');
 
 /**
+ * Appends the context path to the resource based on the strain
+ * @param {RequestContext} ctx Context
+ */
+function setContextPath(ctx) {
+    ctx.resource.contextPath = ctx.strain;
+    return Promise.resolve(ctx);
+};
+
+/**
  * Removes the first title from the resource children
  * @param {RequestContext} ctx Context
  */
@@ -107,6 +116,7 @@ module.exports.main = function (ctx) {
     ctx.resource = ctx.resource || {};
     
     return Promise.resolve(ctx)
+        .then(setContextPath)
         .then(removeFirstTitle)
         .then(collectMetadata)
         .then(extractCommittersFromMetadata)
