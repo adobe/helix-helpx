@@ -2,13 +2,13 @@
 <html>
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />    
-      <link rel="stylesheet" href="/helpx/dist/styles.css"/>
+      <link rel="stylesheet" href="/${it.contextPath}/dist/styles.css"/>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700"/>
     </head>
 
     <body>
         <div class="header">
-            <h1><img src="/helpx/dist/adobe_logo.png"/>Launch, by Adobe, Documentation</h1>
+            <h1><img src="/${it.contextPath}/dist/adobe_logo.png"/>Launch, by Adobe, Documentation</h1>
         </div>
         <div class="main">
             <div class="nav">
