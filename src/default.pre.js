@@ -51,32 +51,6 @@ function collectMetadata(ctx) {
 };
 
 /**
- * Collects the nav and append it to the resource
- * @param {RequestContext} ctx Context
- */
-function collectNav(ctx) {
-    const params = {
-        org: ctx.strainConfig.urls.content.owner,
-        repo: ctx.strainConfig.urls.content.repo,
-        tree: ctx.strainConfig.urls.content.ref,
-        path: 'SUMMARY.md'
-    };
-
-    return md2json.main(params).then(info => {
-        let nav = info.body.children;
-        // remove first title
-        delete nav[0];
-
-        // link re-writing
-        // TODO: move into md2json + parameters
-        ctx.resource.nav = nav.map(element => {
-            return element.replace(new RegExp('href="', 'g'), 'href="/' + ctx.strain + '/');
-        });
-        return Promise.resolve(ctx);
-    });
-};
-
-/**
  * Extracts some committers data from the list of commits and appends the list to the resource
  * @param {RequestContext} ctx Context
  */
@@ -123,7 +97,6 @@ module.exports.main = function (ctx) {
         .then(collectMetadata)
         .then(extractCommittersFromMetadata)
         .then(extractLastModifiedFromMetadata)
-        .then(collectNav)
         .catch(error => {
             console.error('Error while executing default.pre.js', error);
         });
