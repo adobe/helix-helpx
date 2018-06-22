@@ -18,8 +18,20 @@ h1 {
 }
 
 .header {
+    display: flex;
+    align-items: stretch;
     padding: 10px 10px;
     border-bottom: 1px solid #ccc;
+}
+
+
+.header .title {
+    flex: 1 1 auto;
+}
+
+.header .search {
+    flex: 0 0 auto;
+    height: 2.5em;
 }
 
 .main {
@@ -139,4 +151,32 @@ h1 {
 
 .lastModified.visible {
     display: initial;
+}
+
+.search {
+    margin-top: 5px;
+    border-radius: 4px;
+    background: #F5F7F9;
+    border: 1px solid #E6ECF1;
+    background-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="xMidYMid meet" height="1em" width="1em" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" class="_13gjrqj"><g><circle cx="10.5" cy="10.5" r="7.5"></circle><line x1="21" y1="21" x2="15.8" y2="15.8"></line></g></svg>');
+    background-repeat: no-repeat;
+    background-position: 8px center;
+    padding-left: 20px;
+    max-width: 400px;
+}
+
+.searchinput {
+    border: none;
+    outline: none;
+    margin: 0px;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    text-align: inherit;
+    line-height: inherit;
+    cursor: inherit;
+    border-radius: 3px;
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0px 8px;
 }

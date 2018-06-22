@@ -18,12 +18,24 @@ function removeFirstTitle(ctx) {
     return Promise.resolve(ctx);
 };
 
+/**
+ * Rewrites links in nav prefixing with strain context changing to .html
+ * @param {RequestContext} ctx Context
+ */
+function rewriteLinks(ctx) {
+    ctx.resource.children = ctx.resource.children.map(element => {
+        return element.replace(new RegExp('(href=")(.*)(\.md")', 'g'), 'href="/' + ctx.strain + '/$2.html"');
+        });
+    return Promise.resolve(ctx);
+};
+
 module.exports.main = function (ctx) {
     ctx.resource = ctx.resource || {};
     
     return Promise.resolve(ctx)
         .then(setContextPath)
         .then(removeFirstTitle)
+        .then(rewriteLinks)
         .catch(error => {
             console.error('Error while executing nav.pre.js', error);
         });
