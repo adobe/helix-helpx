@@ -1,4 +1,3 @@
-const moment = require('moment');
 const request = require('request-promise');
 
 /**
@@ -82,7 +81,7 @@ function extractLastModifiedFromMetadata(ctx) {
 
     ctx.resource.lastModified = {
         'raw': lastMod,
-        'display': lastMod ? moment(lastMod).fromNow() : 'Unknown'
+        'display': lastMod ? new Date(lastMod) : 'Unknown'
     };
     return Promise.resolve(ctx);
 ;}

@@ -4,6 +4,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />    
       <link rel="stylesheet" href="/${it.contextPath}/dist/styles.css"/>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700"/>
+      <script src="https://momentjs.com/downloads/moment.min.js"></script>
     </head>
 
     <body>
@@ -20,12 +21,20 @@
                         <h1>${it.title}</h1>
                          <div data-sly-test="${it.committers && it.lastModified}" class="author">
                              <sly data-sly-list="${it.committers}"><img title="${item.display}" src="${item.avatar_url}"></sly>
-                            Last modified ${it.lastModified.display}
+                             Last modified <time class="lastModified" datetime="${it.lastModified.raw}">${it.lastModified.display}</time>
                         </div>
                     </div>
                     <div data-sly-list="${it.children}">${item}</div>
                 </div>
             </div>
         </div>
+        <script>
+            window.addEventListener('load', () => {
+                const elem = document.getElementsByClassName('lastModified')[0];
+                const lastMod = elem.getAttribute('datetime');
+                elem.innerHTML = moment(lastMod).fromNow();
+                elem.className +=  ' visible';
+            });
+        </script>
     </body>
 </html>
