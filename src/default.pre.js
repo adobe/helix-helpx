@@ -1,5 +1,6 @@
 const moment = require('moment');
 const request = require('request-promise');
+const md2json = require('md2json');
 
 /**
  * Appends the context path to the resource based on the strain
@@ -45,6 +46,32 @@ function collectMetadata(ctx) {
     console.debug('Fetching...', options.uri);
     return request(options).then(metadata => {
         ctx.resource.metadata = metadata;
+        return Promise.resolve(ctx);
+    });
+};
+
+/**
+ * Collects the nav and append it to the resource
+ * @param {RequestContext} ctx Context
+ */
+function collectNav(ctx) {
+    const params = {
+        org: ctx.strainConfig.urls.content.owner,
+        repo: ctx.strainConfig.urls.content.repo,
+        tree: ctx.strainConfig.urls.content.ref,
+        path: 'SUMMARY.md'
+    };
+
+    return md2json.main(params).then(info => {
+        let nav = info.body.children;
+        // remove first title
+        delete nav[0];
+
+        // link re-writing
+        // TODO: move into md2json + parameters
+        ctx.resource.nav = nav.map(element => {
+            return element.replace(new RegExp('href="', 'g'), 'href="/' + ctx.strain + '/');
+        });
         return Promise.resolve(ctx);
     });
 };
@@ -96,6 +123,7 @@ module.exports.main = function (ctx) {
         .then(collectMetadata)
         .then(extractCommittersFromMetadata)
         .then(extractLastModifiedFromMetadata)
+        .then(collectNav)
         .catch(error => {
             console.error('Error while executing default.pre.js', error);
         });
