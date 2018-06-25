@@ -20,54 +20,17 @@
     "url": "https://github.com/adobe/helix-helpx/issues"
   },
   "homepage": "https://github.com/adobe/helix-helpx#readme",
-  "devDependencies": {
-    "parcel-bundler": "^1.8.1"
+  "dependencies": {
+    "md2json": "0.0.5",
+    "moment": "^2.22.2",
+    "request-promise": "^4.2.2"
   },
-  "eslintConfig": {
-    "parserOptions": {
-      "ecmaVersion": 6,
-      "sourceType": "module"
-    },
-    "env": {
-      "es6": true
-    },
-    "plugins": [
-      "lodash-fp",
-      "fp",
-      "prettier"
-    ],
-    "extends": [
-      "plugin:lodash-fp/recommended",
-      "plugin:prettier/recommended"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "singleQuote": true
-        }
-      ],
-      "fp/no-arguments": "error",
-      "fp/no-class": "error",
-      "fp/no-delete": "error",
-      "fp/no-events": "error",
-      "fp/no-get-set": "error",
-      "fp/no-let": "error",
-      "fp/no-loops": "error",
-      "fp/no-mutating-assign": "error",
-      "fp/no-mutating-methods": "error",
-      "fp/no-mutation": [
-        "error",
-        {
-          "commonjs": true
-        }
-      ],
-      "fp/no-nil": "error",
-      "fp/no-proxy": "error",
-      "fp/no-rest-parameters": "error",
-      "fp/no-this": "error",
-      "fp/no-throw": "error",
-      "fp/no-valueof-field": "error"
-    }
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.9.1",
+    "parcel-bundler": "^1.8.1"
   }
 }
