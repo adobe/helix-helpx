@@ -1,6 +1,6 @@
 const moment = require('moment');
 const request = require('request-promise');
-const md2json = require('md2json');
+const md2json = require('@adobe/md2json');
 
 /**
  * Appends the context path to the resource based on the strain
