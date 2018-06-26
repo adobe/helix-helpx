@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/adobe/helix-helpx#readme",
   "dependencies": {
-    "md2json": "0.0.5",
+    "@adobe/md2json": "^0.0.2",
     "moment": "^2.22.2",
     "request-promise": "^4.2.2"
   },
