@@ -1,12 +1,13 @@
 const moment = require('moment');
 const request = require('request-promise');
 const md2json = require('@adobe/md2json');
-console.log('md2json', md2json);
+
 /**
  * Appends the context path to the resource based on the strain
  * @param {RequestContext} ctx Context
  */
 function setContextPath(ctx) {
+  ctx.resource = ctx.resource || {};
   ctx.resource.contextPath = ctx.strain;
   return Promise.resolve(ctx);
 }
@@ -16,7 +17,10 @@ function setContextPath(ctx) {
  * @param {RequestContext} ctx Context
  */
 function removeFirstTitle(ctx) {
-  delete ctx.resource.children[0];
+  ctx.resource = ctx.resource || {};
+  if (ctx.resource.children && ctx.resource.children.length > 0) {
+    ctx.resource.children = ctx.resource.children.slice(1);
+  }
   return Promise.resolve(ctx);
 }
 
@@ -25,6 +29,12 @@ function removeFirstTitle(ctx) {
  * @param {RequestContext} ctx Context
  */
 function collectMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
+
+  if (!ctx.strainConfig) {
+    return Promise.resolve(ctx);
+  }
+
   const options = {
     uri:
       `${ctx.strainConfig.urls.content.apiRoot}` +
@@ -54,6 +64,12 @@ function collectMetadata(ctx) {
  * @param {RequestContext} ctx Context
  */
 function collectNav(ctx) {
+  ctx.resource = ctx.resource || {};
+
+  if (!ctx.strainConfig) {
+    return Promise.resolve(ctx);
+  }
+
   const params = {
     owner: ctx.strainConfig.urls.content.owner,
     repo: ctx.strainConfig.urls.content.repo,
@@ -78,6 +94,7 @@ function collectNav(ctx) {
  * @param {RequestContext} ctx Context
  */
 function extractCommittersFromMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
   const metadata = ctx.resource.metadata || [];
   const committers = [];
 
@@ -100,6 +117,7 @@ function extractCommittersFromMetadata(ctx) {
  * @param {RequestContext} ctx Context
  */
 function extractLastModifiedFromMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
   const metadata = ctx.resource.metadata || [];
 
   const lastMod = metadata.length > 0
@@ -114,8 +132,6 @@ function extractLastModifiedFromMetadata(ctx) {
 }
 
 function main(ctx) {
-  ctx.resource = ctx.resource || {};
-
   return Promise.resolve(ctx)
     .then(setContextPath)
     .then(removeFirstTitle)
@@ -129,3 +145,9 @@ function main(ctx) {
 }
 
 module.exports.main = main;
+module.exports.setContextPath = setContextPath;
+module.exports.removeFirstTitle = removeFirstTitle;
+module.exports.collectMetadata = collectMetadata;
+module.exports.collectNav = collectNav;
+module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
+module.exports.extractLastModifiedFromMetadata = extractLastModifiedFromMetadata;
