@@ -78,13 +78,15 @@ function collectNav(ctx) {
   };
 
   return md2json.main(params).then((info) => {
-    const nav = info.body.children;
+    let nav = info.body.children;
     // remove first title
-    delete nav[0];
+    if (nav && nav.length > 0) {
+      nav = nav.slice(1);
+    }
 
     // link re-writing
     // TODO: move into md2json + parameters
-    ctx.resource.nav = nav.map(element => element.replace(new RegExp('href="', 'g'), `{href="/${ctx.strain}/'`));
+    ctx.resource.nav = nav.map(element => element.replace(new RegExp('href="', 'g'), `href="/${ctx.strain}/`));
     return Promise.resolve(ctx);
   });
 }
@@ -103,7 +105,7 @@ function extractCommittersFromMetadata(ctx) {
       && committers.map(item => item.avatar_url).indexOf(commit.author.avatar_url) < 0) {
       committers.push({
         avatar_url: commit.author.avatar_url,
-        display: `${commit.commit.author.name} | ${commit.commit.author.email}`,
+        display: `${commit.author.name} | ${commit.author.email}`,
       });
     }
   });
