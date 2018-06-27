@@ -71,6 +71,7 @@ function collectNav(ctx) {
   }
 
   const params = {
+    url: ctx.strainConfig.urls.content.rawRoot,
     owner: ctx.strainConfig.urls.content.owner,
     repo: ctx.strainConfig.urls.content.repo,
     ref: ctx.strainConfig.urls.content.ref,
