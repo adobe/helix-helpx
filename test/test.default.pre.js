@@ -110,7 +110,7 @@ describe('Testing collectNav', () => {
   emptyContextIT(defaultPre.collectNav);
 
   it('Collect nav', (done) => {
-    nock('https://raw.githubusercontent.com').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
+    nock('http://localhost').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
 
     defaultPre.collectNav({
       resource: {},
@@ -118,7 +118,7 @@ describe('Testing collectNav', () => {
       strainConfig: {
         urls: {
           content: {
-            apiRoot: 'http://localhost',
+            rawRoot: 'http://localhost',
             owner: 'owner',
             repo: 'repo',
             ref: 'ref',
