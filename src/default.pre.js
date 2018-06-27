@@ -1,7 +1,7 @@
 const moment = require('moment');
 const request = require('request-promise');
 const md2json = require('@adobe/md2json');
-console.log('md2json', md2json);
+
 /**
  * Appends the context path to the resource based on the strain
  * @param {RequestContext} ctx Context
@@ -55,6 +55,7 @@ function collectMetadata(ctx) {
  */
 function collectNav(ctx) {
   const params = {
+    url: ctx.strainConfig.urls.content.rawRoot,
     owner: ctx.strainConfig.urls.content.owner,
     repo: ctx.strainConfig.urls.content.repo,
     ref: ctx.strainConfig.urls.content.ref,
