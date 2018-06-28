@@ -7,6 +7,7 @@ const md2json = require('@adobe/md2json');
  * @param {RequestContext} ctx Context
  */
 function setContextPath(ctx) {
+  ctx.resource = ctx.resource || {};
   ctx.resource.contextPath = ctx.strain;
   return Promise.resolve(ctx);
 }
@@ -16,7 +17,10 @@ function setContextPath(ctx) {
  * @param {RequestContext} ctx Context
  */
 function removeFirstTitle(ctx) {
-  delete ctx.resource.children[0];
+  ctx.resource = ctx.resource || {};
+  if (ctx.resource.children && ctx.resource.children.length > 0) {
+    ctx.resource.children = ctx.resource.children.slice(1);
+  }
   return Promise.resolve(ctx);
 }
 
@@ -25,6 +29,12 @@ function removeFirstTitle(ctx) {
  * @param {RequestContext} ctx Context
  */
 function collectMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
+
+  if (!ctx.strainConfig) {
+    return Promise.resolve(ctx);
+  }
+
   const options = {
     uri:
       `${ctx.strainConfig.urls.content.apiRoot}` +
@@ -54,6 +64,12 @@ function collectMetadata(ctx) {
  * @param {RequestContext} ctx Context
  */
 function collectNav(ctx) {
+  ctx.resource = ctx.resource || {};
+
+  if (!ctx.strainConfig) {
+    return Promise.resolve(ctx);
+  }
+
   const params = {
     url: ctx.strainConfig.urls.content.rawRoot,
     owner: ctx.strainConfig.urls.content.owner,
@@ -63,13 +79,15 @@ function collectNav(ctx) {
   };
 
   return md2json.main(params).then((info) => {
-    const nav = info.body.children;
+    let nav = info.body.children;
     // remove first title
-    delete nav[0];
+    if (nav && nav.length > 0) {
+      nav = nav.slice(1);
+    }
 
     // link re-writing
     // TODO: move into md2json + parameters
-    ctx.resource.nav = nav.map(element => element.replace(new RegExp('href="', 'g'), `{href="/${ctx.strain}/'`));
+    ctx.resource.nav = nav.map(element => element.replace(new RegExp('href="', 'g'), `href="/${ctx.strain}/`));
     return Promise.resolve(ctx);
   });
 }
@@ -79,6 +97,7 @@ function collectNav(ctx) {
  * @param {RequestContext} ctx Context
  */
 function extractCommittersFromMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
   const metadata = ctx.resource.metadata || [];
   const committers = [];
 
@@ -87,7 +106,7 @@ function extractCommittersFromMetadata(ctx) {
       && committers.map(item => item.avatar_url).indexOf(commit.author.avatar_url) < 0) {
       committers.push({
         avatar_url: commit.author.avatar_url,
-        display: `${commit.commit.author.name} | ${commit.commit.author.email}`,
+        display: `${commit.author.name} | ${commit.author.email}`,
       });
     }
   });
@@ -101,6 +120,7 @@ function extractCommittersFromMetadata(ctx) {
  * @param {RequestContext} ctx Context
  */
 function extractLastModifiedFromMetadata(ctx) {
+  ctx.resource = ctx.resource || {};
   const metadata = ctx.resource.metadata || [];
 
   const lastMod = metadata.length > 0
@@ -115,8 +135,6 @@ function extractLastModifiedFromMetadata(ctx) {
 }
 
 function main(ctx) {
-  ctx.resource = ctx.resource || {};
-
   return Promise.resolve(ctx)
     .then(setContextPath)
     .then(removeFirstTitle)
@@ -130,3 +148,9 @@ function main(ctx) {
 }
 
 module.exports.main = main;
+module.exports.setContextPath = setContextPath;
+module.exports.removeFirstTitle = removeFirstTitle;
+module.exports.collectMetadata = collectMetadata;
+module.exports.collectNav = collectNav;
+module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
+module.exports.extractLastModifiedFromMetadata = extractLastModifiedFromMetadata;
