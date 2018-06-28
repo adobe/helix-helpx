@@ -145,6 +145,14 @@ h1 {
     font-weight: 400;
 }
 
+.lastModified {
+    display: none;
+}
+
+.lastModified.visible {
+    display: initial;
+}
+
 .search {
     margin-top: 5px;
     border-radius: 4px;

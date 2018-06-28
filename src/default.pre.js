@@ -1,4 +1,3 @@
-const moment = require('moment');
 const request = require('request-promise');
 const md2json = require('@adobe/md2json');
 
@@ -128,8 +127,8 @@ function extractLastModifiedFromMetadata(ctx) {
     && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
   ctx.resource.lastModified = {
-    raw: lastMod,
-    display: lastMod ? moment(lastMod).fromNow() : 'Unknown',
+    'raw': lastMod,
+    'display': lastMod ? new Date(lastMod) : 'Unknown'
   };
   return Promise.resolve(ctx);
 }
