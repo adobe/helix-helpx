@@ -18,7 +18,7 @@
         </div>
         <div class="main">
             <div class="nav">
-                <esi:include src="/${it.contextPath}/SUMMARY.html" />
+                <div data-sly-test="${it.nav}" data-sly-list="${it.nav}">${item}</div>
             </div>
             <div class="content">
                 <div class="content-body">
