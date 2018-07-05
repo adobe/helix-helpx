@@ -133,7 +133,7 @@ function extractLastModifiedFromMetadata(ctx) {
   return Promise.resolve(ctx);
 }
 
-function main(ctx) {
+function pre(ctx) {
   return Promise.resolve(ctx)
     .then(setContextPath)
     .then(removeFirstTitle)
@@ -146,7 +146,7 @@ function main(ctx) {
     });
 }
 
-module.exports.main = main;
+module.exports.pre = pre;
 module.exports.setContextPath = setContextPath;
 module.exports.removeFirstTitle = removeFirstTitle;
 module.exports.collectMetadata = collectMetadata;

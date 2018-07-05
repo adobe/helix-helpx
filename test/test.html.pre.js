@@ -12,19 +12,19 @@
 /* global describe, it */
 const assert = require('assert');
 const nock = require('nock');
-const defaultPre = require('../src/default.pre.js');
+const defaultPre = require('../src/html.pre.js');
 
 describe('Testing pre requirements for main function', () => {
-  it('Exports main', () => {
-    assert.ok(defaultPre.main);
+  it('Exports pre', () => {
+    assert.ok(defaultPre.pre);
   });
 
-  it('main is a function', () => {
-    assert.equal('function', typeof defaultPre.main);
+  it('pre is a function', () => {
+    assert.equal('function', typeof defaultPre.pre);
   });
 
-  it('main returns a Promise', () => {
-    const ret = defaultPre.main({});
+  it('pre returns a Promise', () => {
+    const ret = defaultPre.pre({});
     assert.equal('function', typeof ret.then);
   });
 });
