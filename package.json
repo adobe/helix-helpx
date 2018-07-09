@@ -22,13 +22,15 @@
   },
   "homepage": "https://github.com/adobe/helix-helpx#readme",
   "dependencies": {
-    "@adobe/md2json": "^0.0.2",
     "moment": "^2.22.2",
     "request": "^2.87.0",
     "request-promise": "^4.2.2"
   },
   "devDependencies": {
-    "@adobe/parcel-plugin-htl": "^0.3.0-class",
+    "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
+    "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
+    "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
+    "@adobe/parcel-plugin-htl": "file:./../parcel-plugin-htl",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.12.0",
