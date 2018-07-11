@@ -1,61 +1,131 @@
 const request = require('request-promise');
-const md2json = require('@adobe/md2json');
 
 /**
- * Appends the context path to the resource based on the strain
- * @param {RequestContext} ctx Context
+ * Appends the context path to the payload
+ * @param {Object} payload Payload
+ * @param {Object} secrets Secrets
+ * @param {Object} logger Logger
  */
-function setContextPath(ctx) {
-  ctx.resource = ctx.resource || {};
-  ctx.resource.contextPath = ctx.strain;
-  return Promise.resolve(ctx);
+function setContextPath({ payload, secrets, logger }) {
+  // TODO move one level up, this should be set somewhere else (Petridish or dispatch?)
+  logger.debug('html-pre.js - Setting context path');
+  const res = Object.assign(payload, {
+    contextPath: '/',
+  });
+  return Promise.resolve({ payload: res, secrets, logger });
 }
 
 /**
  * Removes the first title from the resource children
- * @param {RequestContext} ctx Context
+ * @param {Object} payload Payload
+ * @param {Object} secrets Secrets
+ * @param {Object} logger Logger
  */
-function removeFirstTitle(ctx) {
-  ctx.resource = ctx.resource || {};
-  if (ctx.resource.children && ctx.resource.children.length > 0) {
-    ctx.resource.children = ctx.resource.children.slice(1);
+function removeFirstTitle({ payload, secrets, logger }) {
+  logger.debug('html-pre.js - Removing first title');
+
+  let children = [];
+  if (payload.resource) {
+    if (payload.resource.children && payload.resource.children.length > 0) {
+      children = payload.resource.children.slice(1);
+    }
   }
-  return Promise.resolve(ctx);
+
+  const res = Object.assign({}, payload);
+  res.resource.children = children;
+
+  return Promise.resolve({ payload: res, secrets, logger });
 }
 
 /**
  * Collects the resource metadata and appends them to the resource
- * @param {RequestContext} ctx Context
+ * @param {Object} payload Payload
+ * @param {Object} secrets Secrets
+ * @param {Object} logger Logger
  */
-function collectMetadata(ctx) {
-  ctx.resource = ctx.resource || {};
+function collectMetadata({ payload, secrets, logger }) {
+  logger.debug('html-pre.js - Collecting metadata');
 
-  if (!ctx.strainConfig) {
-    return Promise.resolve(ctx);
+  if (!secrets.REPO_API_ROOT) {
+    return Promise.resolve({ payload, secrets, logger });
   }
 
   const options = {
     uri:
-      `${ctx.strainConfig.urls.content.apiRoot}` +
-      '/repos/' +
-      `${ctx.strainConfig.urls.content.owner}` +
+      `${secrets.REPO_API_ROOT}` +
+      'repos/' +
+      `${payload.owner}` +
       '/' +
-      `${ctx.strainConfig.urls.content.repo}` +
+      `${payload.repo}` +
       '/commits?path=' +
-      `${ctx.resourcePath}.md` +
+      `${payload.path}` +
       '&sha=' +
-      `${ctx.strainConfig.urls.content.ref}`,
+      `${payload.ref}`,
     headers: {
       'User-Agent': 'Request-Promise',
     },
     json: true,
   };
 
-  console.debug('Fetching...', options.uri);
+  logger.debug(`html-pre.js - Fetching... ${options.uri}`);
   return request(options).then((metadata) => {
-    ctx.resource.metadata = metadata;
-    return Promise.resolve(ctx);
+    const res = Object.assign({}, payload);
+    res.resource.metadata = metadata;
+
+    return Promise.resolve({ payload: res, secrets, logger });
   });
+}
+
+/**
+ * Extracts some committers data from the list of commits and appends the list to the resource
+ * @param {Object} payload Payload
+ * @param {Object} secrets Secrets
+ * @param {Object} logger Logger
+ */
+function extractCommittersFromMetadata({ payload, secrets, logger }) {
+  logger.debug('html-pre.js - Extracting committers from metadata');
+  const metadata = payload.resource.metadata || [];
+  const committers = [];
+
+  metadata.forEach((commit) => {
+    if (commit.author
+      && committers.map(item => item.avatar_url).indexOf(commit.author.avatar_url) < 0) {
+      committers.push({
+        avatar_url: commit.author.avatar_url,
+        display: `${commit.author.name} | ${commit.author.email}`,
+      });
+    }
+  });
+
+  const res = Object.assign({}, payload);
+  res.resource.committers = committers;
+
+  logger.debug(`html-pre.js - Nomber of committers extracted: ${committers.length}`);
+
+  return Promise.resolve({ payload: res, secrets, logger });
+}
+
+/**
+ * Extracts the last modified data of the resource and appends it to the resource
+ * @param {Object} payload Payload
+ * @param {Object} secrets Secrets
+ * @param {Object} logger Logger
+ */
+function extractLastModifiedFromMetadata({ payload, secrets, logger }) {
+  logger.debug('html-pre.js - Extracting last modified from metadata');
+  const metadata = payload.resource.metadata || [];
+
+  const lastMod = metadata.length > 0
+    && metadata[0].commit
+    && metadata[0].commit.author ? metadata[0].commit.author.date : null;
+
+  const res = Object.assign({}, payload);
+  res.resource.lastModified = {
+    raw: lastMod,
+    display: lastMod ? new Date(lastMod) : 'Unknown',
+  };
+
+  return Promise.resolve({ payload: res, secrets, logger });
 }
 
 /**
@@ -91,65 +161,37 @@ function collectNav(ctx) {
   });
 }
 
-/**
- * Extracts some committers data from the list of commits and appends the list to the resource
- * @param {RequestContext} ctx Context
- */
-function extractCommittersFromMetadata(ctx) {
-  ctx.resource = ctx.resource || {};
-  const metadata = ctx.resource.metadata || [];
-  const committers = [];
-
-  metadata.forEach((commit) => {
-    if (commit.author
-      && committers.map(item => item.avatar_url).indexOf(commit.author.avatar_url) < 0) {
-      committers.push({
-        avatar_url: commit.author.avatar_url,
-        display: `${commit.author.name} | ${commit.author.email}`,
-      });
-    }
-  });
-
-  ctx.resource.committers = committers;
-  return Promise.resolve(ctx);
-}
-
-/**
- * Extracts the last modified data of the resource and appends it to the resource
- * @param {RequestContext} ctx Context
- */
-function extractLastModifiedFromMetadata(ctx) {
-  ctx.resource = ctx.resource || {};
-  const metadata = ctx.resource.metadata || [];
-
-  const lastMod = metadata.length > 0
-    && metadata[0].commit
-    && metadata[0].commit.author ? metadata[0].commit.author.date : null;
-
-  ctx.resource.lastModified = {
-    raw: lastMod,
-    display: lastMod ? new Date(lastMod) : 'Unknown',
-  };
-  return Promise.resolve(ctx);
-}
-
-function pre(ctx) {
-  return Promise.resolve(ctx)
-    .then(setContextPath)
-    .then(removeFirstTitle)
-    .then(collectMetadata)
-    .then(extractCommittersFromMetadata)
-    .then(extractLastModifiedFromMetadata)
-    .then(collectNav)
-    .catch((error) => {
-      console.error('Error while executing default.pre.js', error);
+// module.exports.pre is a function (taking next as an argument)
+// that returns a function (with payload, secrets, logger as arguments)
+// that calls next (after modifying the payload a bit)
+module.exports.pre = next => (payload, secrets, logger) => {
+  try {
+    return Promise.resolve({ payload, secrets, logger })
+      .then(setContextPath)
+      .then(removeFirstTitle)
+      .then(collectMetadata)
+      .then(extractCommittersFromMetadata)
+      .then(extractLastModifiedFromMetadata)
+      // .then(collectNav)
+      .catch((e) => {
+        logger.error(`Error while during html.pre.js execution: ${e.stack || e}`);
+        return {
+          error: e,
+        };
+      })
+      .then(({ payload: finalPayload }) => next(finalPayload, secrets, logger));
+  } catch (e) {
+    logger.error(`Error while executing html.pre.js: ${e.stack || e}`);
+    return Promise.resolve({
+      error: e,
     });
-}
+  }
+};
 
-module.exports.pre = pre;
+// required for testing
 module.exports.setContextPath = setContextPath;
 module.exports.removeFirstTitle = removeFirstTitle;
 module.exports.collectMetadata = collectMetadata;
-module.exports.collectNav = collectNav;
 module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
 module.exports.extractLastModifiedFromMetadata = extractLastModifiedFromMetadata;
+// module.exports.collectNav = collectNav;
