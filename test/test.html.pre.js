@@ -23,61 +23,63 @@ describe('Testing pre requirements for main function', () => {
     assert.equal('function', typeof defaultPre.pre);
   });
 
-  it('pre returns a Promise', () => {
-    const ret = defaultPre.pre({});
+  it('pre returns next', (done) => {
+    /* eslint no-unused-vars: "off" */
+    const next = (payload, secrets, logger) => done();
+    const ret = defaultPre.pre(next)({}, {}, console);
     assert.equal('function', typeof ret.then);
+    ret.then({ payload: {}, secrets: {}, logger: console });
   });
 });
 
-function emptyContextIT(fct) {
-  it('Empty context should not trigger exception', (done) => {
-    fct({}).then(() => done()).catch(error => done(error));
+function emptyPayloadIT(fct) {
+  it('Empty payload should not trigger an exception', (done) => {
+    fct({ payload: {}, secrets: {}, logger: console })
+      .then(() => done()).catch(error => done(error));
   });
 }
 
 describe('Testing setContextPath', () => {
-  emptyContextIT(defaultPre.setContextPath);
-
-  it('Strain defines the context path', (done) => {
-    const expectedContextPath = 'strainDefinesContextPath';
-
-    defaultPre.setContextPath({
-      strain: expectedContextPath,
-    }).then((ctx) => {
-      assert(ctx.resource.contextPath, expectedContextPath);
-      done();
-    }).catch(error => done(error));
-  });
+  // TODO adjust when method is removed
+  emptyPayloadIT(defaultPre.setContextPath);
 });
 
 describe('Testing removeFirstTitle', () => {
-  emptyContextIT(defaultPre.removeFirstTitle);
+  emptyPayloadIT(defaultPre.removeFirstTitle);
 
   it('Empty children', (done) => {
     defaultPre.removeFirstTitle({
-      resource: {
-        children: [],
+      payload: {
+        resource: {
+          children: [],
+        },
       },
-    }).then((ctx) => {
-      assert.deepEqual(ctx.resource.children, []);
+      secrets: {},
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.deepEqual(payload.resource.children, []);
       done();
     }).catch(error => done(error));
   });
 
   it('Remove first child', (done) => {
     defaultPre.removeFirstTitle({
-      resource: {
-        children: ['a', 'b', 'c'],
+      payload: {
+        resource: {
+          children: ['a', 'b', 'c'],
+        },
       },
-    }).then((ctx) => {
-      assert.deepEqual(ctx.resource.children, ['b', 'c']);
+      secrets: {},
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.deepEqual(payload.resource.children, ['b', 'c']);
       done();
     }).catch(error => done(error));
   });
 });
 
 describe('Testing collectMetadata', () => {
-  emptyContextIT(defaultPre.collectMetadata);
+  emptyPayloadIT(defaultPre.collectMetadata);
 
   it('Collect metadata', (done) => {
     const expectedMetadata = {
@@ -87,79 +89,58 @@ describe('Testing collectMetadata', () => {
     nock('http://localhost').get('/repos/owner/repo/commits?path=resourcePath.md&sha=ref').reply(200, expectedMetadata);
 
     defaultPre.collectMetadata({
-      resource: {},
-      resourcePath: 'resourcePath',
-      strainConfig: {
-        urls: {
-          content: {
-            apiRoot: 'http://localhost',
-            owner: 'owner',
-            repo: 'repo',
-            ref: 'ref',
-          },
+      payload: {
+        owner: 'owner',
+        repo: 'repo',
+        ref: 'ref',
+        path: 'resourcePath.md',
+        resource: {
+          children: ['a', 'b', 'c'],
         },
       },
-    }).then((ctx) => {
-      assert.deepEqual(ctx.resource.metadata, expectedMetadata);
-      done();
-    }).catch(error => done(error));
-  });
-});
-
-describe('Testing collectNav', () => {
-  emptyContextIT(defaultPre.collectNav);
-
-  it('Collect nav', (done) => {
-    nock('http://localhost').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
-
-    defaultPre.collectNav({
-      resource: {},
-      strain: 'strain',
-      strainConfig: {
-        urls: {
-          content: {
-            rawRoot: 'http://localhost',
-            owner: 'owner',
-            repo: 'repo',
-            ref: 'ref',
-          },
-        },
+      secrets: {
+        REPO_API_ROOT: 'http://localhost/',
       },
-    }).then((ctx) => {
-      assert.deepEqual(ctx.resource.nav[0], '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="/strain/link.md">link</a></li>\n</ul>');
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.deepEqual(payload.resource.metadata, expectedMetadata);
       done();
     }).catch(error => done(error));
   });
 });
 
 describe('Testing extractCommittersFromMetadata', () => {
-  emptyContextIT(defaultPre.extractCommittersFromMetadata);
+  emptyPayloadIT(defaultPre.extractCommittersFromMetadata);
 
   it('Extract committers', (done) => {
     defaultPre.extractCommittersFromMetadata({
-      resource: {
-        metadata: [{
-          author: {
-            avatar_url: 'a1_url',
-            email: 'a1_email',
-            name: 'a1',
-          },
-        }, {
-          author: {
-            avatar_url: 'a2_url',
-            email: 'a2_email',
-            name: 'a2',
-          },
-        }, {
-          author: {
-            avatar_url: 'a2_url',
-            email: 'a2_email_different',
-            name: 'a2_different',
-          },
-        }],
+      payload: {
+        resource: {
+          metadata: [{
+            author: {
+              avatar_url: 'a1_url',
+              email: 'a1_email',
+              name: 'a1',
+            },
+          }, {
+            author: {
+              avatar_url: 'a2_url',
+              email: 'a2_email',
+              name: 'a2',
+            },
+          }, {
+            author: {
+              avatar_url: 'a2_url',
+              email: 'a2_email_different',
+              name: 'a2_different',
+            },
+          }],
+        },
       },
-    }).then((ctx) => {
-      assert.deepEqual(ctx.resource.committers, [{
+      secrets: {},
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.deepEqual(payload.resource.committers, [{
         avatar_url: 'a1_url',
         display: 'a1 | a1_email',
       }, {
@@ -172,29 +153,57 @@ describe('Testing extractCommittersFromMetadata', () => {
 });
 
 describe('Testing extractLastModifiedFromMetadata', () => {
-  emptyContextIT(defaultPre.extractLastModifiedFromMetadata);
+  emptyPayloadIT(defaultPre.extractLastModifiedFromMetadata);
 
   it('Extract last modified', (done) => {
     defaultPre.extractLastModifiedFromMetadata({
-      resource: {
-        metadata: [{
-          commit: {
-            author: {
-              name: 'a1',
-              date: '01 Jan 2018 00:01:00 GMT',
-            },
-          },
-        }, {
-          author: {
+      payload: {
+        resource: {
+          metadata: [{
             commit: {
-              name: 'a2',
-              date: '01 Jan 2018 00:00:00 GMT',
+              author: {
+                name: 'a1',
+                date: '01 Jan 2018 00:01:00 GMT',
+              },
             },
-          },
-        }],
+          }, {
+            author: {
+              commit: {
+                name: 'a2',
+                date: '01 Jan 2018 00:00:00 GMT',
+              },
+            },
+          }],
+        },
       },
-    }).then((ctx) => {
-      assert.equal(ctx.resource.lastModified.raw, '01 Jan 2018 00:01:00 GMT');
+      secrets: {},
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.equal(payload.resource.lastModified.raw, '01 Jan 2018 00:01:00 GMT');
+      done();
+    }).catch(error => done(error));
+  });
+});
+
+describe.only('Testing collectNav', () => {
+  emptyPayloadIT(defaultPre.collectNav);
+
+  it('Collect nav', (done) => {
+    nock('http://localhost').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
+
+    defaultPre.collectNav({
+      payload: {
+        owner: 'owner',
+        repo: 'repo',
+        ref: 'ref',
+        resource: {},
+      },
+      secrets: {
+        REPO_API_ROOT: 'http://localhost/',
+      },
+      logger: console,
+    }).then(({ payload, secrets, logger }) => {
+      assert.deepEqual(payload.resource.nav[0], '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="/strain/link.md">link</a></li>\n</ul>');
       done();
     }).catch(error => done(error));
   });
