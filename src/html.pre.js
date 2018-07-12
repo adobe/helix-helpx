@@ -140,7 +140,6 @@ function extractLastModifiedFromMetadata({ payload, secrets, logger }) {
 function collectNav({ payload, secrets, logger }) {
   logger.debug('html-pre.js - Collecting the nav');
 
-  // TODO
   if (!secrets.REPO_RAW_ROOT) {
     return Promise.resolve({ payload, secrets, logger });
   }
@@ -163,13 +162,10 @@ function collectNav({ payload, secrets, logger }) {
       // remove first title
       if (nav && nav.length > 0) {
         nav = nav.slice(1);
-        logger.debug(`html-pre.js - Found ${nav.length} items in the nav`);
       }
-      res.resource.nav = nav.map((element) => {
-        return element
-          .replace(new RegExp('href="', 'g'), `href="${payload.contextPath}`)
-          .replace(new RegExp('.md"', 'g'), '.html"');
-      });
+      res.resource.nav = nav.map(element => element
+        .replace(new RegExp('href="', 'g'), `href="${payload.contextPath}`)
+        .replace(new RegExp('.md"', 'g'), '.html"'));
     }
 
     return Promise.resolve({ payload: res, secrets: s, logger: l });
