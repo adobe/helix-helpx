@@ -18,7 +18,7 @@
         </div>
         <div class="main">
             <div class="nav">
-                <div data-sly-test="${it.nav}" data-sly-list="${it.nav}">${item}</div>
+                <div data-sly-test="${it.resource.nav}" data-sly-list="${it.resource.nav}">${item}</div>
             </div>
             <div class="content">
                 <div class="content-body">

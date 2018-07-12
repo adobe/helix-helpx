@@ -1,4 +1,5 @@
 const request = require('request-promise');
+const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
 /**
  * Appends the context path to the payload
@@ -144,31 +145,36 @@ function collectNav({ payload, secrets, logger }) {
     return Promise.resolve({ payload, secrets, logger });
   }
 
-  // const params = {
-  //   url: secrets.REPO_RAW_ROOT,
-  //   owner: payload.owner,
-  //   repo: payload.repo,
-  //   ref: payload.ref,
-  //   path: 'SUMMARY.md',
-  // };
+  const params = {
+    url: secrets.REPO_RAW_ROOT,
+    owner: payload.owner,
+    repo: payload.repo,
+    ref: payload.ref,
+    path: 'SUMMARY.md',
+  };
 
-  const res = Object.assign({}, payload);
+  logger.debug('html-pre.js - Received nav');
 
-  // return md2json.main(params).then((info) => {
-  //   let nav = info.body.children;
-  //   // remove first title
-  //   if (nav && nav.length > 0) {
-  //     nav = nav.slice(1);
-  //   }
+  const next = (navPayload, s, l) => {
+    const res = Object.assign({}, payload);
 
-  // link re-writing
-  // TODO: move into md2json + parameters
-  // ctx.resource.nav =
-  // nav.map(element => element.replace(new RegExp('href="', 'g'), `href="/${ctx.strain}/`));
-  //  return Promise.resolve(ctx);
-  // });
+    if (navPayload.resource) {
+      let nav = navPayload.resource.children;
+      // remove first title
+      if (nav && nav.length > 0) {
+        nav = nav.slice(1);
+        logger.debug(`html-pre.js - Found ${nav.length} items in the nav`);
+      }
+      res.resource.nav = nav.map((element) => {
+        return element
+          .replace(new RegExp('href="', 'g'), `href="${payload.contextPath}`)
+          .replace(new RegExp('.md"', 'g'), '.html"');
+      });
+    }
 
-  return Promise.resolve({ payload: res, secrets, logger });
+    return Promise.resolve({ payload: res, secrets: s, logger: l });
+  };
+  return pipe(next, params, secrets, logger);
 }
 
 // module.exports.pre is a function (taking next as an argument)
@@ -182,7 +188,7 @@ module.exports.pre = next => (payload, secrets, logger) => {
       .then(collectMetadata)
       .then(extractCommittersFromMetadata)
       .then(extractLastModifiedFromMetadata)
-      // .then(collectNav)
+      .then(collectNav)
       .catch((e) => {
         logger.error(`Error while during html.pre.js execution: ${e.stack || e}`);
         next({

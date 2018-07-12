@@ -14,6 +14,15 @@ const assert = require('assert');
 const nock = require('nock');
 const defaultPre = require('../src/html.pre.js');
 
+const loggerMock = {
+  log: () => {},
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  silly: () => {},
+};
+
 describe('Testing pre requirements for main function', () => {
   it('Exports pre', () => {
     assert.ok(defaultPre.pre);
@@ -26,15 +35,15 @@ describe('Testing pre requirements for main function', () => {
   it('pre returns next', (done) => {
     /* eslint no-unused-vars: "off" */
     const next = (payload, secrets, logger) => done();
-    const ret = defaultPre.pre(next)({}, {}, console);
+    const ret = defaultPre.pre(next)({}, {}, loggerMock);
     assert.equal('function', typeof ret.then);
-    ret.then({ payload: {}, secrets: {}, logger: console });
+    ret.then({ payload: {}, secrets: {}, logger: loggerMock });
   });
 });
 
 function emptyPayloadIT(fct) {
   it('Empty payload should not trigger an exception', (done) => {
-    fct({ payload: {}, secrets: {}, logger: console })
+    fct({ payload: {}, secrets: {}, logger: loggerMock })
       .then(() => done()).catch(error => done(error));
   });
 }
@@ -55,7 +64,7 @@ describe('Testing removeFirstTitle', () => {
         },
       },
       secrets: {},
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
       assert.deepEqual(payload.resource.children, []);
       done();
@@ -70,7 +79,7 @@ describe('Testing removeFirstTitle', () => {
         },
       },
       secrets: {},
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
       assert.deepEqual(payload.resource.children, ['b', 'c']);
       done();
@@ -101,7 +110,7 @@ describe('Testing collectMetadata', () => {
       secrets: {
         REPO_API_ROOT: 'http://localhost/',
       },
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
       assert.deepEqual(payload.resource.metadata, expectedMetadata);
       done();
@@ -138,7 +147,7 @@ describe('Testing extractCommittersFromMetadata', () => {
         },
       },
       secrets: {},
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
       assert.deepEqual(payload.resource.committers, [{
         avatar_url: 'a1_url',
@@ -177,7 +186,7 @@ describe('Testing extractLastModifiedFromMetadata', () => {
         },
       },
       secrets: {},
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
       assert.equal(payload.resource.lastModified.raw, '01 Jan 2018 00:01:00 GMT');
       done();
@@ -196,14 +205,15 @@ describe.only('Testing collectNav', () => {
         owner: 'owner',
         repo: 'repo',
         ref: 'ref',
+        contextPath: '/',
         resource: {},
       },
       secrets: {
-        REPO_API_ROOT: 'http://localhost/',
+        REPO_RAW_ROOT: 'http://localhost/',
       },
-      logger: console,
+      logger: loggerMock,
     }).then(({ payload, secrets, logger }) => {
-      assert.deepEqual(payload.resource.nav[0], '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="/strain/link.md">link</a></li>\n</ul>');
+      assert.deepEqual(payload.resource.nav[1], '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="/link.html">link</a></li>\n</ul>');
       done();
     }).catch(error => done(error));
   });
