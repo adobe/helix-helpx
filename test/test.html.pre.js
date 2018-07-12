@@ -194,7 +194,7 @@ describe('Testing extractLastModifiedFromMetadata', () => {
   });
 });
 
-describe.only('Testing collectNav', () => {
+describe('Testing collectNav', () => {
   emptyPayloadIT(defaultPre.collectNav);
 
   it('Collect nav', (done) => {
