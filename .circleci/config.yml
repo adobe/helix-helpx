@@ -32,4 +32,4 @@ jobs:
 
         - run:
             name: Deploying to Adobe I/O Runtime
-            command: ./node_modules/.bin/hlx deploy
+            command: ./node_modules/.bin/hlx deploy --no-auto --wsk-auth $WSK_AUTH --loggly-auth $LOGGLY_AUTH --wsk-namespace trieloff --loggly-host trieloff
