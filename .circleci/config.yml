@@ -29,6 +29,7 @@ jobs:
             name: Building Templates
             command: ./node_modules/.bin/hlx build
 
+
         - run:
             name: Deploying to Adobe I/O Runtime
             command: ./node_modules/.bin/hlx deploy
