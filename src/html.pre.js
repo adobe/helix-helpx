@@ -32,6 +32,8 @@ function removeFirstTitle({ payload, secrets, logger }) {
       children = payload.resource.children.slice(1);
     }
     res.resource.children = children;
+  } else {
+    logger.debug('html-pre.js - Payload has no resource');
   }
 
   return Promise.resolve({ payload: res, secrets, logger });
@@ -47,6 +49,7 @@ function collectMetadata({ payload, secrets, logger }) {
   logger.debug('html-pre.js - Collecting metadata');
 
   if (!secrets.REPO_API_ROOT) {
+    logger.debug('html-pre.js - No REPO_API_ROOT provided');
     return Promise.resolve({ payload, secrets, logger });
   }
 
@@ -73,6 +76,9 @@ function collectMetadata({ payload, secrets, logger }) {
 
     if (payload.resource) {
       res.resource.metadata = metadata;
+      logger.debug('html-pre.js - Managed to fetch some metadata');
+    } else {
+      logger.debug('html-pre.js - Payload has no resource');
     }
 
     return Promise.resolve({ payload: res, secrets, logger });
@@ -105,6 +111,8 @@ function extractCommittersFromMetadata({ payload, secrets, logger }) {
     });
     res.resource.committers = committers;
     logger.debug(`html-pre.js - Nomber of committers extracted: ${committers.length}`);
+  } else {
+    logger.debug('html-pre.js - Payload has no resource');
   }
 
   return Promise.resolve({ payload: res, secrets, logger });
@@ -127,10 +135,15 @@ function extractLastModifiedFromMetadata({ payload, secrets, logger }) {
       && metadata[0].commit
       && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
+    const display = new Date(lastMod);
+
     res.resource.lastModified = {
       raw: lastMod,
-      display: lastMod ? new Date(lastMod) : 'Unknown',
+      display: lastMod ? display : 'Unknown',
     };
+    logger.debug(`html-pre.js - Managed to fetch a last modified: ${display}`);
+  } else {
+    logger.debug('html-pre.js - Payload has no resource');
   }
 
   return Promise.resolve({ payload: res, secrets, logger });
@@ -141,6 +154,7 @@ function collectNav({ payload, secrets, logger }) {
   logger.debug('html-pre.js - Collecting the nav');
 
   if (!secrets.REPO_RAW_ROOT) {
+    logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
     return Promise.resolve({ payload, secrets, logger });
   }
 
@@ -152,9 +166,9 @@ function collectNav({ payload, secrets, logger }) {
     path: 'SUMMARY.md',
   };
 
-  logger.debug('html-pre.js - Received nav');
-
   const next = (navPayload, s, l) => {
+    logger.debug('html-pre.js - Received nav');
+
     const res = Object.assign({}, payload);
 
     if (navPayload.resource) {
@@ -166,6 +180,10 @@ function collectNav({ payload, secrets, logger }) {
       res.resource.nav = nav.map(element => element
         .replace(new RegExp('href="', 'g'), `href="${payload.contextPath}`)
         .replace(new RegExp('.md"', 'g'), '.html"'));
+
+      logger.debug('html-pre.js - Managed to fetch some content for the nav');
+    } else {
+      logger.debug('html-pre.js - Navigation payload has no resource');
     }
 
     return Promise.resolve({ payload: res, secrets: s, logger: l });
