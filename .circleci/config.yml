@@ -20,6 +20,10 @@ jobs:
             name: Installing Helix CLI
             command: npm install @adobe/helix-cli
 
+        - run:
+            name: Checking CLI Version
+            command: ./node_modules/.bin/hlx --version
+
         - save_cache:
             paths:
                 - node_modules
