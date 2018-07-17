@@ -110,7 +110,7 @@ function extractCommittersFromMetadata({ payload, secrets, logger }) {
       }
     });
     res.resource.committers = committers;
-    logger.debug(`html-pre.js - Nomber of committers extracted: ${committers.length}`);
+    logger.debug(`html-pre.js - Number of committers extracted: ${committers.length}`);
   } else {
     logger.debug('html-pre.js - Payload has no resource');
   }
