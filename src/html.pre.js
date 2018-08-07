@@ -128,7 +128,7 @@ async function collectNav(payload, secrets, logger) {
 
     if (navPayload.resource) {
       let nav = navPayload.resource.children;
-      logger.debug(nav);
+
       // remove first title
       if (nav && nav.length > 0) {
         nav = nav.slice(1);
