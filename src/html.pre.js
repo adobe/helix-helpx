@@ -1,27 +1,20 @@
 const request = require('request-promise');
 const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
+/* eslint no-param-reassign: off */
+
 /**
  * Removes the first title from the resource children
  * @param {Object} payload Payload
- * @param {Object} secrets Secrets
  * @param {Object} logger Logger
  */
-function removeFirstTitle({ payload, secrets, logger }) {
+function removeFirstTitle(resource, logger) {
   logger.debug('html-pre.js - Removing first title');
-
-  const res = Object.assign({}, payload);
-  if (payload.resource) {
-    let children = [];
-    if (payload.resource.children && payload.resource.children.length > 0) {
-      children = payload.resource.children.slice(1);
-    }
-    res.resource.children = children;
-  } else {
-    logger.debug('html-pre.js - Payload has no resource');
+  let children = [];
+  if (resource.children && resource.children.length > 0) {
+    children = resource.children.slice(1);
   }
-
-  return Promise.resolve({ payload: res, secrets, logger });
+  resource.children = children;
 }
 
 /**
@@ -30,12 +23,12 @@ function removeFirstTitle({ payload, secrets, logger }) {
  * @param {Object} secrets Secrets
  * @param {Object} logger Logger
  */
-function collectMetadata({ payload, secrets, logger }) {
+async function collectMetadata(payload, secrets, logger) {
   logger.debug('html-pre.js - Collecting metadata');
 
   if (!secrets.REPO_API_ROOT) {
     logger.debug('html-pre.js - No REPO_API_ROOT provided');
-    return Promise.resolve({ payload, secrets, logger });
+    return null;
   }
 
   const options = {
@@ -56,33 +49,17 @@ function collectMetadata({ payload, secrets, logger }) {
   };
 
   logger.debug(`html-pre.js - Fetching... ${options.uri}`);
-  return request(options).then((metadata) => {
-    const res = Object.assign({}, payload);
-
-    if (payload.resource) {
-      res.resource.metadata = metadata;
-      logger.debug('html-pre.js - Managed to fetch some metadata');
-    } else {
-      logger.debug('html-pre.js - Payload has no resource');
-    }
-
-    return Promise.resolve({ payload: res, secrets, logger });
-  });
+  return request(options);
 }
 
 /**
  * Extracts some committers data from the list of commits and appends the list to the resource
  * @param {Object} payload Payload
- * @param {Object} secrets Secrets
  * @param {Object} logger Logger
  */
-function extractCommittersFromMetadata({ payload, secrets, logger }) {
+function extractCommittersFromMetadata(metadata, logger) {
   logger.debug('html-pre.js - Extracting committers from metadata');
-
-  const res = Object.assign({}, payload);
-
-  if (payload.resource) {
-    const metadata = payload.resource.metadata || [];
+  if (metadata) {
     const committers = [];
 
     metadata.forEach((commit) => {
@@ -94,53 +71,48 @@ function extractCommittersFromMetadata({ payload, secrets, logger }) {
         });
       }
     });
-    res.resource.committers = committers;
     logger.debug(`html-pre.js - Number of committers extracted: ${committers.length}`);
-  } else {
-    logger.debug('html-pre.js - Payload has no resource');
+    return committers;
   }
 
-  return Promise.resolve({ payload: res, secrets, logger });
+  logger.debug('html-pre.js - No metadata found!');
+  return null;
 }
 
 /**
  * Extracts the last modified data of the resource and appends it to the resource
  * @param {Object} payload Payload
- * @param {Object} secrets Secrets
  * @param {Object} logger Logger
  */
-function extractLastModifiedFromMetadata({ payload, secrets, logger }) {
+function extractLastModifiedFromMetadata(metadata, logger) {
   logger.debug('html-pre.js - Extracting last modified from metadata');
 
-  const res = Object.assign({}, payload);
-  if (payload.resource) {
-    const metadata = payload.resource.metadata || [];
-
+  if (metadata) {
     const lastMod = metadata.length > 0
       && metadata[0].commit
       && metadata[0].commit.author ? metadata[0].commit.author.date : null;
 
     const display = new Date(lastMod);
 
-    res.resource.lastModified = {
+    const lastModified = {
       raw: lastMod,
       display: lastMod ? display : 'Unknown',
     };
     logger.debug(`html-pre.js - Managed to fetch a last modified: ${display}`);
-  } else {
-    logger.debug('html-pre.js - Payload has no resource');
+    return lastModified;
   }
 
-  return Promise.resolve({ payload: res, secrets, logger });
+  logger.debug('html-pre.js - No metadata found!');
+  return null;
 }
 
 
-function collectNav({ payload, secrets, logger }) {
+async function collectNav(payload, secrets, logger) {
   logger.debug('html-pre.js - Collecting the nav');
 
   if (!secrets.REPO_RAW_ROOT) {
     logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
-    return Promise.resolve({ payload, secrets, logger });
+    return null;
   }
 
   const params = {
@@ -151,56 +123,63 @@ function collectNav({ payload, secrets, logger }) {
     path: 'SUMMARY.md',
   };
 
-  const next = (navPayload, s, l) => {
+  function next(navPayload) {
     logger.debug('html-pre.js - Received nav');
-
-    const res = Object.assign({}, payload);
 
     if (navPayload.resource) {
       let nav = navPayload.resource.children;
+      logger.debug(nav);
       // remove first title
       if (nav && nav.length > 0) {
         nav = nav.slice(1);
       }
-      res.resource.nav = nav.map(element => element
-        .replace(new RegExp('href="', 'g'), `href="/`)
+      nav = nav.map(element => element
+        .replace(new RegExp('href="', 'g'), 'href="/')
         .replace(new RegExp('.md"', 'g'), '.html"'));
 
+      navPayload.resource.children = nav;
       logger.debug('html-pre.js - Managed to fetch some content for the nav');
-    } else {
-      logger.debug('html-pre.js - Navigation payload has no resource');
+      return navPayload;
     }
 
-    return Promise.resolve({ payload: res, secrets: s, logger: l });
-  };
-  return pipe(next, params, secrets, logger);
+    logger.debug('html-pre.js - Navigation payload has no resource');
+    return null;
+  }
+
+  const navPayload = await pipe(next, params, secrets, logger);
+  return navPayload.resource.children;
 }
 
 // module.exports.pre is a function (taking next as an argument)
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
-module.exports.pre = next => (payload, secrets, logger) => {
-  try {
-    return Promise.resolve({ payload, secrets, logger })
-      .then(removeFirstTitle)
-      .then(collectMetadata)
-      .then(extractCommittersFromMetadata)
-      .then(extractLastModifiedFromMetadata)
-      .then(collectNav)
-      .catch((e) => {
-        logger.error(`Error while during html.pre.js execution: ${e.stack || e}`);
-        next({
-          error: e,
-        }, secrets, logger);
-      })
-      .then(({ payload: finalPayload }) => next(finalPayload, secrets, logger));
-  } catch (e) {
-    logger.error(`Error while executing html.pre.js: ${e.stack || e}`);
-    return Promise.resolve({
-      error: e,
-    });
-  }
-};
+function pre(next) {
+  return async function process(payload, secrets, logger) {
+    try {
+      if (!payload.resource) {
+        logger.debug('html-pre.js - Payload has no resource, nothing we can do');
+        return next(payload, secrets, logger);
+      }
+
+      const p = payload;
+
+      removeFirstTitle(p.resource, logger);
+      p.resource.metadata = await collectMetadata(p, secrets, logger);
+      p.resource.committers = extractCommittersFromMetadata(p.resource.metadata, logger);
+      p.resource.lastModified = extractLastModifiedFromMetadata(p.resource.metadata, logger);
+      p.resource.nav = await collectNav(p, secrets, logger);
+
+      return next(p, secrets, logger);
+    } catch (e) {
+      logger.error(`Error while executing html.pre.js: ${e.stack || e}`);
+      return {
+        error: e,
+      };
+    }
+  };
+}
+
+module.exports.pre = pre;
 
 // required for testing
 module.exports.removeFirstTitle = removeFirstTitle;
