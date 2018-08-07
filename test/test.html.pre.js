@@ -48,11 +48,6 @@ function emptyPayloadIT(fct) {
   });
 }
 
-describe('Testing setContextPath', () => {
-  // TODO adjust when method is removed
-  emptyPayloadIT(defaultPre.setContextPath);
-});
-
 describe('Testing removeFirstTitle', () => {
   emptyPayloadIT(defaultPre.removeFirstTitle);
 
@@ -205,7 +200,6 @@ describe('Testing collectNav', () => {
         owner: 'owner',
         repo: 'repo',
         ref: 'ref',
-        contextPath: '/',
         resource: {},
       },
       secrets: {

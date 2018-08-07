@@ -2,21 +2,6 @@ const request = require('request-promise');
 const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
 /**
- * Appends the context path to the payload
- * @param {Object} payload Payload
- * @param {Object} secrets Secrets
- * @param {Object} logger Logger
- */
-function setContextPath({ payload, secrets, logger }) {
-  // TODO move one level up, this should be set somewhere else (Petridish or dispatch?)
-  logger.debug('html-pre.js - Setting context path');
-  const res = Object.assign(payload, {
-    contextPath: '/',
-  });
-  return Promise.resolve({ payload: res, secrets, logger });
-}
-
-/**
  * Removes the first title from the resource children
  * @param {Object} payload Payload
  * @param {Object} secrets Secrets
@@ -178,7 +163,7 @@ function collectNav({ payload, secrets, logger }) {
         nav = nav.slice(1);
       }
       res.resource.nav = nav.map(element => element
-        .replace(new RegExp('href="', 'g'), `href="${payload.contextPath}`)
+        .replace(new RegExp('href="', 'g'), `href="/`)
         .replace(new RegExp('.md"', 'g'), '.html"'));
 
       logger.debug('html-pre.js - Managed to fetch some content for the nav');
@@ -197,7 +182,6 @@ function collectNav({ payload, secrets, logger }) {
 module.exports.pre = next => (payload, secrets, logger) => {
   try {
     return Promise.resolve({ payload, secrets, logger })
-      .then(setContextPath)
       .then(removeFirstTitle)
       .then(collectMetadata)
       .then(extractCommittersFromMetadata)
@@ -219,7 +203,6 @@ module.exports.pre = next => (payload, secrets, logger) => {
 };
 
 // required for testing
-module.exports.setContextPath = setContextPath;
 module.exports.removeFirstTitle = removeFirstTitle;
 module.exports.collectMetadata = collectMetadata;
 module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
