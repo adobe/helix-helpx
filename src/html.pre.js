@@ -186,4 +186,5 @@ module.exports.removeFirstTitle = removeFirstTitle;
 module.exports.collectMetadata = collectMetadata;
 module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
 module.exports.extractLastModifiedFromMetadata = extractLastModifiedFromMetadata;
+module.exports.fetchNav = fetchNav;
 module.exports.collectNav = collectNav;
