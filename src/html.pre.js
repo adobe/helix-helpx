@@ -106,8 +106,29 @@ function extractLastModifiedFromMetadata(metadata, logger) {
   return null;
 }
 
+function collectNav(navPayload, logger) {
+  logger.debug('html-pre.js - Received nav');
 
-async function collectNav(payload, secrets, logger) {
+  if (navPayload.resource) {
+    let nav = navPayload.resource.children;
+
+    // remove first title
+    if (nav && nav.length > 0) {
+      nav = nav.slice(1);
+    }
+    nav = nav.map(element => element
+      .replace(new RegExp('href="', 'g'), 'href="/')
+      .replace(new RegExp('.md"', 'g'), '.html"'));
+
+    logger.debug('html-pre.js - Managed to fetch some content for the nav');
+    return nav;
+  }
+
+  logger.debug('html-pre.js - Navigation payload has no resource');
+  return null;
+}
+
+async function fetchNav(payload, secrets, logger) {
   logger.debug('html-pre.js - Collecting the nav');
 
   if (!secrets.REPO_RAW_ROOT) {
@@ -123,31 +144,7 @@ async function collectNav(payload, secrets, logger) {
     path: 'SUMMARY.md',
   };
 
-  function next(navPayload) {
-    logger.debug('html-pre.js - Received nav');
-
-    if (navPayload.resource) {
-      let nav = navPayload.resource.children;
-
-      // remove first title
-      if (nav && nav.length > 0) {
-        nav = nav.slice(1);
-      }
-      nav = nav.map(element => element
-        .replace(new RegExp('href="', 'g'), 'href="/')
-        .replace(new RegExp('.md"', 'g'), '.html"'));
-
-      navPayload.resource.children = nav;
-      logger.debug('html-pre.js - Managed to fetch some content for the nav');
-      return navPayload;
-    }
-
-    logger.debug('html-pre.js - Navigation payload has no resource');
-    return null;
-  }
-
-  const navPayload = await pipe(next, params, secrets, logger);
-  return navPayload.resource.children;
+  return pipe(null, params, secrets, logger);
 }
 
 // module.exports.pre is a function (taking next as an argument)
@@ -167,7 +164,9 @@ function pre(next) {
       p.resource.metadata = await collectMetadata(p, secrets, logger);
       p.resource.committers = extractCommittersFromMetadata(p.resource.metadata, logger);
       p.resource.lastModified = extractLastModifiedFromMetadata(p.resource.metadata, logger);
-      p.resource.nav = await collectNav(p, secrets, logger);
+
+      const navPayload = await fetchNav(p, secrets, logger);
+      p.resource.nav = collectNav(navPayload, logger);
 
       return next(p, secrets, logger);
     } catch (e) {
