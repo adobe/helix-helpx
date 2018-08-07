@@ -63,7 +63,8 @@ function extractCommittersFromMetadata(metadata, logger) {
     const committers = [];
 
     metadata.forEach((entry) => {
-      if (entry.commit.author
+      if (entry.author
+        && entry.commit.author
         && committers.map(item => item.avatar_url).indexOf(entry.author.avatar_url) < 0) {
         committers.push({
           avatar_url: entry.author.avatar_url,
