@@ -62,12 +62,12 @@ function extractCommittersFromMetadata(metadata, logger) {
   if (metadata) {
     const committers = [];
 
-    metadata.forEach((commit) => {
-      if (commit.author
-        && committers.map(item => item.avatar_url).indexOf(commit.author.avatar_url) < 0) {
+    metadata.forEach((entry) => {
+      if (entry.commit.author
+        && committers.map(item => item.avatar_url).indexOf(entry.author.avatar_url) < 0) {
         committers.push({
-          avatar_url: commit.author.avatar_url,
-          display: `${commit.author.name} | ${commit.author.email}`,
+          avatar_url: entry.author.avatar_url,
+          display: `${entry.commit.author.name} | ${entry.commit.author.email}`,
         });
       }
     });
