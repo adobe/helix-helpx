@@ -14,6 +14,7 @@ function removeFirstTitle(resource, logger) {
     children = resource.children.slice(1);
   }
   ret.children = children;
+  return ret;
 }
 
 /**
