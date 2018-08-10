@@ -31,14 +31,6 @@ describe('Testing pre requirements for main function', () => {
   it('pre is a function', () => {
     assert.equal('function', typeof defaultPre.pre);
   });
-
-  it('pre returns next', (done) => {
-    /* eslint no-unused-vars: "off" */
-    const next = (payload, secrets, logger) => done();
-    const ret = defaultPre.pre(next)({}, {}, loggerMock);
-    assert.equal('function', typeof ret.then);
-    ret.then({ payload: {}, secrets: {}, logger: loggerMock });
-  });
 });
 
 describe('Testing removeFirstTitle', () => {

@@ -1,39 +1,38 @@
 const request = require('request-promise');
 const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
-/* eslint no-param-reassign: off */
-
 /**
  * Removes the first title from the resource children
- * @param {Object} payload Payload
+ * @param {Object} resource Payload resource
  * @param {Object} logger Logger
  */
 function removeFirstTitle(resource, logger) {
+  const ret = resource;
   logger.debug('html-pre.js - Removing first title');
   let children = [];
   if (resource.children && resource.children.length > 0) {
     children = resource.children.slice(1);
   }
-  resource.children = children;
+  ret.children = children;
 }
 
 /**
  * Collects the resource metadata and appends them to the resource
  * @param {Object} payload Payload
- * @param {Object} secrets Secrets
+ * @param {Object} config Config
  * @param {Object} logger Logger
  */
-async function collectMetadata(payload, secrets, logger) {
+async function collectMetadata(payload, config, logger) {
   logger.debug('html-pre.js - Collecting metadata');
 
-  if (!secrets.REPO_API_ROOT) {
+  if (!config.REPO_API_ROOT) {
     logger.debug('html-pre.js - No REPO_API_ROOT provided');
     return null;
   }
 
   const options = {
     uri:
-      `${secrets.REPO_API_ROOT}` +
+      `${config.REPO_API_ROOT}` +
       'repos/' +
       `${payload.owner}` +
       '/' +
@@ -53,8 +52,9 @@ async function collectMetadata(payload, secrets, logger) {
 }
 
 /**
- * Extracts some committers data from the list of commits and appends the list to the resource
- * @param {Object} payload Payload
+ * Extracts some committers data from the list of commits (metadata)
+ * and returns the list of committers
+ * @param {Object} metadata metadata
  * @param {Object} logger Logger
  */
 function extractCommittersFromMetadata(metadata, logger) {
@@ -81,8 +81,9 @@ function extractCommittersFromMetadata(metadata, logger) {
 }
 
 /**
- * Extracts the last modified data of the resource and appends it to the resource
- * @param {Object} payload Payload
+ * Extracts the last modified date of commits (metadata) and
+ * returns an object containing the date details
+ * @param {Object} metadata Metadata
  * @param {Object} logger Logger
  */
 function extractLastModifiedFromMetadata(metadata, logger) {
@@ -107,6 +108,11 @@ function extractLastModifiedFromMetadata(metadata, logger) {
   return null;
 }
 
+/**
+ * Returns that nav items based on the nav payload
+ * @param {Object} navPayload Nav payload
+ * @param {Object} logger Logger
+ */
 function collectNav(navPayload, logger) {
   logger.debug('html-pre.js - Received nav');
 
@@ -129,54 +135,60 @@ function collectNav(navPayload, logger) {
   return null;
 }
 
-async function fetchNav(payload, secrets, logger) {
+/**
+ * Fetches the nav payload
+ * @param {Object} payload Current page payload
+ * @param {Object} config Config
+ * @param {Object} logger Logger
+ */
+async function fetchNav(payload, config, logger) {
   logger.debug('html-pre.js - Collecting the nav');
 
-  if (!secrets.REPO_RAW_ROOT) {
+  if (!config.REPO_RAW_ROOT) {
     logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
     return null;
   }
 
   const params = {
-    url: secrets.REPO_RAW_ROOT,
+    url: config.REPO_RAW_ROOT,
     owner: payload.owner,
     repo: payload.repo,
     ref: payload.ref,
     path: 'SUMMARY.md',
   };
 
-  return pipe(null, params, secrets, logger);
+  return pipe(null, params, config, logger);
 }
 
 // module.exports.pre is a function (taking next as an argument)
-// that returns a function (with payload, secrets, logger as arguments)
+// that returns a function (with payload, config, logger as arguments)
 // that calls next (after modifying the payload a bit)
-function pre(next) {
-  return async function process(payload, secrets, logger) {
-    try {
-      if (!payload.resource) {
-        logger.debug('html-pre.js - Payload has no resource, nothing we can do');
-        return next(payload, secrets, logger);
-      }
+async function pre(payload, config) {
+  const { logger } = config;
 
-      const p = payload;
-
-      removeFirstTitle(p.resource, logger);
-      p.resource.metadata = await collectMetadata(p, secrets, logger);
-      p.resource.committers = extractCommittersFromMetadata(p.resource.metadata, logger);
-      p.resource.lastModified = extractLastModifiedFromMetadata(p.resource.metadata, logger);
-
-      const navPayload = await fetchNav(p, secrets, logger);
-      p.resource.nav = collectNav(navPayload, logger);
-
-      return next(p, secrets, logger);
-    } catch (e) {
-      logger.error(`Error while executing html.pre.js: ${e.stack || e}`);
-      return {
-        error: e,
-      };
+  try {
+    if (!payload.resource) {
+      logger.debug('html-pre.js - Payload has no resource, nothing we can do');
+      return payload;
     }
-  };
+
+    const p = payload;
+
+    p.resource = removeFirstTitle(p.resource, logger);
+    p.resource.metadata = await collectMetadata(p, config, logger);
+    p.resource.committers = extractCommittersFromMetadata(p.resource.metadata, logger);
+    p.resource.lastModified = extractLastModifiedFromMetadata(p.resource.metadata, logger);
+
+    const navPayload = await fetchNav(p, config, logger);
+    p.resource.nav = collectNav(navPayload, logger);
+
+    return p;
+  } catch (e) {
+    logger.error(`Error while executing html.pre.js: ${e.stack || e}`);
+    return {
+      error: e,
+    };
+  }
 }
 
 module.exports.pre = pre;
