@@ -20,10 +20,6 @@ jobs:
             name: Installing Helix CLI
             command: npm install @adobe/helix-cli
 
-        - run:
-            name: Checking CLI Version
-            command: ./node_modules/.bin/hlx --version
-
         - save_cache:
             paths:
                 - node_modules
@@ -33,7 +29,6 @@ jobs:
             name: Building Templates
             command: ./node_modules/.bin/hlx build
 
-
         - run:
             name: Deploying to Adobe I/O Runtime
-            command: ./node_modules/.bin/hlx deploy --no-auto --wsk-auth $WSK_AUTH --loggly-auth $LOGGLY_AUTH --wsk-namespace trieloff --loggly-host trieloff
+            command: ./node_modules/.bin/hlx deploy
