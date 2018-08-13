@@ -25,9 +25,8 @@ cd helix-helpx
 hlx up
 ```
 
-Now simply open: [](http://localhost:3000/README.html)
+Now simply open: [http://localhost:3000/README.html](http://localhost:3000/README.html)
 
 ## "Publish"
 
-// TODO
-// WIP deployment to helpx.experience-adobe.com
+Check [Getting Started guide](https://github.com/adobe/project-helix/blob/master/getting-started.md) for deployment.
