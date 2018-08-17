@@ -3,45 +3,41 @@ const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js')
 
 /**
  * Removes the first title from the resource children
- * @param {Object} resource Payload resource
+ * @param Array children Children
  * @param {Object} logger Logger
  */
-function removeFirstTitle(resource, logger) {
-  const ret = resource;
+function removeFirstTitle(children, logger) {
   logger.debug('html-pre.js - Removing first title');
-  let children = [];
-  if (resource.children && resource.children.length > 0) {
-    children = resource.children.slice(1);
+  let ret = children;
+  if (ret && ret.length > 0) {
+    ret = ret.slice(1);
   }
-  ret.children = children;
   return ret;
 }
 
 /**
- * Collects the resource metadata and appends them to the resource
- * @param {Object} payload Payload
- * @param {Object} config Config
+ * Fetches the commits history
+ * @param String apiRoot API root url
+ * @param String owner Owner
+ * @param String repo Repo
+ * @param String ref Ref
+ * @param String path Path to the resource
  * @param {Object} logger Logger
  */
-async function collectMetadata(payload, config, logger) {
-  logger.debug('html-pre.js - Collecting metadata');
-
-  if (!config.REPO_API_ROOT) {
-    logger.debug('html-pre.js - No REPO_API_ROOT provided');
-    return null;
-  }
+async function fetchCommitsHistory(apiRoot, owner, repo, ref, path, logger) {
+  logger.debug('html-pre.js - Fetching the commits history');
 
   const options = {
     uri:
-      `${config.REPO_API_ROOT}` +
+      `${apiRoot}` +
       'repos/' +
-      `${payload.owner}` +
+      `${owner}` +
       '/' +
-      `${payload.repo}` +
+      `${repo}` +
       '/commits?path=' +
-      `${payload.path}` +
+      `${path}` +
       '&sha=' +
-      `${payload.ref}`,
+      `${ref}`,
     headers: {
       'User-Agent': 'Request-Promise',
     },
@@ -53,17 +49,17 @@ async function collectMetadata(payload, config, logger) {
 }
 
 /**
- * Extracts some committers data from the list of commits (metadata)
+ * Extracts some committers data from the list of commits
  * and returns the list of committers
- * @param {Object} metadata metadata
+ * @param Array commits Commits
  * @param {Object} logger Logger
  */
-function extractCommittersFromMetadata(metadata, logger) {
+function extractCommittersFromCommitsHistory(commits, logger) {
   logger.debug('html-pre.js - Extracting committers from metadata');
-  if (metadata) {
+  if (commits) {
     const committers = [];
 
-    metadata.forEach((entry) => {
+    commits.forEach((entry) => {
       if (entry.author
         && entry.commit.author
         && committers.map(item => item.avatar_url).indexOf(entry.author.avatar_url) < 0) {
@@ -77,23 +73,23 @@ function extractCommittersFromMetadata(metadata, logger) {
     return committers;
   }
 
-  logger.debug('html-pre.js - No metadata found!');
-  return null;
+  logger.debug('html-pre.js - No committers found!');
+  return [];
 }
 
 /**
- * Extracts the last modified date of commits (metadata) and
+ * Extracts the last modified date of commits and
  * returns an object containing the date details
- * @param {Object} metadata Metadata
+ * @param Array commits Commits
  * @param {Object} logger Logger
  */
-function extractLastModifiedFromMetadata(metadata, logger) {
+function extractLastModifiedFromCommitsHistory(commits, logger) {
   logger.debug('html-pre.js - Extracting last modified from metadata');
 
-  if (metadata) {
-    const lastMod = metadata.length > 0
-      && metadata[0].commit
-      && metadata[0].commit.author ? metadata[0].commit.author.date : null;
+  if (commits) {
+    const lastMod = commits.length > 0
+      && commits[0].commit
+      && commits[0].commit.author ? commits[0].commit.author.date : null;
 
     const display = new Date(lastMod);
 
@@ -105,20 +101,23 @@ function extractLastModifiedFromMetadata(metadata, logger) {
     return lastModified;
   }
 
-  logger.debug('html-pre.js - No metadata found!');
-  return null;
+  logger.debug('html-pre.js - No last modified found!');
+  return {
+    raw: 'Unknown',
+    display: 'Unknown',
+  };
 }
 
 /**
- * Returns that nav items based on the nav payload
- * @param {Object} navPayload Nav payload
+ * Returns that nav items based on the nav children
+ * @param Array navChildren Children of the nav
  * @param {Object} logger Logger
  */
-function collectNav(navPayload, logger) {
-  logger.debug('html-pre.js - Received nav');
+function extractNav(navChildren, logger) {
+  logger.debug('html-pre.js - Extracting nav');
 
-  if (navPayload.resource) {
-    let nav = navPayload.resource.children;
+  if (navChildren) {
+    let nav = navChildren;
 
     // remove first title
     if (nav && nav.length > 0) {
@@ -128,33 +127,29 @@ function collectNav(navPayload, logger) {
       .replace(new RegExp('href="', 'g'), 'href="/')
       .replace(new RegExp('.md"', 'g'), '.html"'));
 
-    logger.debug('html-pre.js - Managed to fetch some content for the nav');
+    logger.debug('html-pre.js - Managed to collect some content for the nav');
     return nav;
   }
 
-  logger.debug('html-pre.js - Navigation payload has no resource');
-  return null;
+  logger.debug('html-pre.js - Navigation payload has no children');
+  return [];
 }
 
 /**
  * Fetches the nav payload
- * @param {Object} payload Current page payload
- * @param {Object} config Config
+ * @param String rawRoot Raw root url
+ * @param String owner Owner
+ * @param String repo Repo
+ * @param String ref Ref
  * @param {Object} logger Logger
  */
-async function fetchNav(payload, config, logger) {
-  logger.debug('html-pre.js - Collecting the nav');
-
-  if (!config.REPO_RAW_ROOT) {
-    logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
-    return null;
-  }
+async function fetchNavPayload(owner, repo, ref, config, logger) {
+  logger.debug('html-pre.js - Fectching the nav');
 
   const params = {
-    url: config.REPO_RAW_ROOT,
-    owner: payload.owner,
-    repo: payload.repo,
-    ref: payload.ref,
+    owner,
+    repo,
+    ref,
     path: 'SUMMARY.md',
   };
 
@@ -175,13 +170,27 @@ async function pre(payload, config) {
 
     const p = payload;
 
-    p.resource = removeFirstTitle(p.resource, logger);
-    p.resource.metadata = await collectMetadata(p, config, logger);
-    p.resource.committers = extractCommittersFromMetadata(p.resource.metadata, logger);
-    p.resource.lastModified = extractLastModifiedFromMetadata(p.resource.metadata, logger);
+    // clean up the resource
+    p.resource.children = removeFirstTitle(p.resource.children, logger);
 
-    const navPayload = await fetchNav(p, config, logger);
-    p.resource.nav = collectNav(navPayload, logger);
+    // extract committers info and last modified based on commits history
+    if (config.REPO_API_ROOT) {
+      p.resource.commits =
+        await fetchCommitsHistory(config.REPO_API_ROOT, p.owner, p.repo, p.ref, p.path, logger);
+      p.resource.committers = extractCommittersFromCommitsHistory(p.resource.commits, logger);
+      p.resource.lastModified = extractLastModifiedFromCommitsHistory(p.resource.commits, logger);
+    } else {
+      logger.debug('html-pre.js - No REPO_API_ROOT provided');
+    }
+
+    // fetch and inject the nav
+    if (config.REPO_RAW_ROOT) {
+      const navPayload =
+        await fetchNavPayload(p.owner, p.repo, p.ref, config, logger);
+      p.resource.nav = extractNav(navPayload.resource.children, logger);
+    } else {
+      logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
+    }
 
     return p;
   } catch (e) {
@@ -194,10 +203,10 @@ async function pre(payload, config) {
 
 module.exports.pre = pre;
 
-// required for testing
+// required only for testing
 module.exports.removeFirstTitle = removeFirstTitle;
-module.exports.collectMetadata = collectMetadata;
-module.exports.extractCommittersFromMetadata = extractCommittersFromMetadata;
-module.exports.extractLastModifiedFromMetadata = extractLastModifiedFromMetadata;
-module.exports.fetchNav = fetchNav;
-module.exports.collectNav = collectNav;
+module.exports.fetchCommitsHistory = fetchCommitsHistory;
+module.exports.extractCommittersFromCommitsHistory = extractCommittersFromCommitsHistory;
+module.exports.extractLastModifiedFromCommitsHistory = extractLastModifiedFromCommitsHistory;
+module.exports.fetchNavPayload = fetchNavPayload;
+module.exports.extractNav = extractNav;

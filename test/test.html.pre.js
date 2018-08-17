@@ -35,57 +35,36 @@ describe('Testing pre requirements for main function', () => {
 
 describe('Testing removeFirstTitle', () => {
   it('Empty children', () => {
-    const resource = {
-      children: [],
-    };
-    defaultPre.removeFirstTitle(resource, loggerMock);
-    assert.deepEqual(resource.children, []);
+    const children = [];
+    const output = defaultPre.removeFirstTitle(children, loggerMock);
+    assert.deepEqual(output, []);
   });
 
   it('Remove first child', () => {
-    const resource = {
-      children: ['a', 'b', 'c'],
-    };
-    defaultPre.removeFirstTitle(resource, loggerMock);
-    assert.deepEqual(resource.children, ['b', 'c']);
+    const children = ['a', 'b', 'c'];
+    const output = defaultPre.removeFirstTitle(children, loggerMock);
+    assert.deepEqual(output, ['b', 'c']);
   });
 });
 
-describe('Testing collectMetadata', () => {
-  it('Empty payload should not trigger an exception', async () => {
-    const metadata = await defaultPre.collectMetadata({}, {}, loggerMock);
-    assert.equal(metadata, null);
-  });
-
-  it('Collect metadata', async () => {
-    const expectedMetadata = {
+describe('Testing fetchCommitsHistory', () => {
+  it('Collect commits', async () => {
+    const expectedCommits = {
       p1: 1,
       p2: 2,
     };
-    nock('http://localhost').get('/repos/owner/repo/commits?path=resourcePath.md&sha=ref').reply(200, expectedMetadata);
+    nock('http://localhost').get('/repos/owner/repo/commits?path=resourcePath.md&sha=ref').reply(200, expectedCommits);
 
-    const metadata = await defaultPre.collectMetadata(
-      {
-        owner: 'owner',
-        repo: 'repo',
-        ref: 'ref',
-        path: 'resourcePath.md',
-        resource: {
-          children: ['a', 'b', 'c'],
-        },
-      }, {
-        REPO_API_ROOT: 'http://localhost/',
-      },
-      loggerMock,
-    );
+    const metadata =
+      await defaultPre.fetchCommitsHistory('http://localhost/', 'owner', 'repo', 'ref', 'resourcePath.md', loggerMock);
 
-    assert.deepEqual(metadata, expectedMetadata);
+    assert.deepEqual(metadata, expectedCommits);
   });
 });
 
-describe('Testing extractCommittersFromMetadata', () => {
+describe('Testing extractCommittersFromCommitsHistory', () => {
   it('Extract committers', () => {
-    const output = defaultPre.extractCommittersFromMetadata([{
+    const output = defaultPre.extractCommittersFromCommitsHistory([{
       author: {
         avatar_url: 'a1_url',
       },
@@ -127,9 +106,9 @@ describe('Testing extractCommittersFromMetadata', () => {
   });
 });
 
-describe('Testing extractLastModifiedFromMetadata', () => {
+describe('Testing extractLastModifiedFromCommitsHistory', () => {
   it('Extract last modified', () => {
-    const output = defaultPre.extractLastModifiedFromMetadata([{
+    const output = defaultPre.extractLastModifiedFromCommitsHistory([{
       commit: {
         author: {
           name: 'a1',
@@ -149,39 +128,25 @@ describe('Testing extractLastModifiedFromMetadata', () => {
   });
 });
 
-describe('Testing fetchNav', () => {
+describe('Testing fetchNavPayload', () => {
   it('fectch nav', async () => {
     nock('http://localhost').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
 
-    const navPayload = await defaultPre.fetchNav(
-      {
-        owner: 'owner',
-        repo: 'repo',
-        ref: 'ref',
-        resource: {},
-      }, {
-        REPO_RAW_ROOT: 'http://localhost/',
-      },
-      loggerMock,
-    );
+    const navPayload = await defaultPre.fetchNavPayload('owner', 'repo', 'ref', { REPO_RAW_ROOT: 'http://localhost/' }, loggerMock);
 
     assert.equal(navPayload.resource.body, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
     assert.equal(navPayload.resource.html, '<h1>Table of contents</h1>\n<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="link.md">link</a></li>\n</ul>');
   });
 });
 
-describe('Testing collectNav', () => {
+describe('Testing extractNav', () => {
   it('Collect nav', () => {
-    const output = defaultPre.collectNav(
-      {
-        resource: {
-          children: [
-            '<h1>Table of contents</h1>',
-            '\n',
-            '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="link.md">link</a></li>\n</ul>',
-          ],
-        },
-      },
+    const output = defaultPre.extractNav(
+      [
+        '<h1>Table of contents</h1>',
+        '\n',
+        '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="link.md">link</a></li>\n</ul>',
+      ],
       loggerMock,
     );
 
