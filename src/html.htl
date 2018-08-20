@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="/dist/styles.css"/>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700"/>
       <script src="https://momentjs.com/downloads/moment.min.js"></script>
+      <title>${it.resource.title}</title>
     </head>
 
     <body>
