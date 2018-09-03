@@ -38,3 +38,7 @@ jobs:
         - run:
             name: Activate CDN
             command: npx hlx strain
+
+        - run:
+            name: Test Performance
+            command: npx hlx perf
