@@ -29,7 +29,7 @@ jobs:
             name: Building Templates
             command: npx hlx build
 
-        - run: git status
+        - run: git status || git diff
 
         - run:
             name: Deploying to Adobe I/O Runtime
