@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
     steps:
         - checkout
 
@@ -27,8 +27,8 @@ jobs:
 
         - run:
             name: Building Templates
-            command: ./node_modules/.bin/hlx build
+            command: npx hlx build
 
         - run:
             name: Deploying to Adobe I/O Runtime
-            command: ./node_modules/.bin/hlx deploy
+            command: npx hlx deploy --no-auto
