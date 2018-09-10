@@ -143,7 +143,7 @@ function extractNav(navChildren, logger) {
  * @param String ref Ref
  * @param {Object} logger Logger
  */
-async function fetchNavPayload(owner, repo, ref, config, logger) {
+async function fetchNavPayload(owner, repo, ref, logger) {
   logger.debug('html-pre.js - Fectching the nav');
 
   const params = {
@@ -153,14 +153,14 @@ async function fetchNavPayload(owner, repo, ref, config, logger) {
     path: 'SUMMARY.md',
   };
 
-  return pipe(null, params, config, logger);
+  return pipe(null, {}, { request: { params }});
 }
 
 // module.exports.pre is a function (taking next as an argument)
 // that returns a function (with payload, config, logger as arguments)
 // that calls next (after modifying the payload a bit)
-async function pre(payload, config) {
-  const { logger } = config;
+async function pre(payload, action) {
+  const { logger, secrets, request: actionReq } = action;
 
   try {
     if (!payload.resource) {
@@ -174,9 +174,16 @@ async function pre(payload, config) {
     p.resource.children = removeFirstTitle(p.resource.children, logger);
 
     // extract committers info and last modified based on commits history
-    if (config.REPO_API_ROOT) {
+    if (secrets.REPO_API_ROOT) {
       p.resource.commits =
-        await fetchCommitsHistory(config.REPO_API_ROOT, p.owner, p.repo, p.ref, p.path, logger);
+        await fetchCommitsHistory(
+          secrets.REPO_API_ROOT,
+          actionReq.params.owner,
+          actionReq.params.repo,
+          actionReq.params.ref,
+          actionReq.params.path,
+          logger,
+        );
       p.resource.committers = extractCommittersFromCommitsHistory(p.resource.commits, logger);
       p.resource.lastModified = extractLastModifiedFromCommitsHistory(p.resource.commits, logger);
     } else {
@@ -184,9 +191,14 @@ async function pre(payload, config) {
     }
 
     // fetch and inject the nav
-    if (config.REPO_RAW_ROOT) {
+    if (secrets.REPO_RAW_ROOT) {
       const navPayload =
-        await fetchNavPayload(p.owner, p.repo, p.ref, config, logger);
+        await fetchNavPayload(
+          actionReq.params.owner,
+          actionReq.params.repo,
+          actionReq.params.ref,
+          logger,
+        );
       p.resource.nav = extractNav(navPayload.resource.children, logger);
     } else {
       logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
