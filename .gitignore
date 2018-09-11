@@ -200,3 +200,5 @@ venv.bak/
 .idea/
 
 .hlx
+
+env.inf
