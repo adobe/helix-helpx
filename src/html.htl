@@ -5,7 +5,7 @@
       <link rel="stylesheet" href="./static/styles.css"/>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700"/>
       <script src="https://momentjs.com/downloads/moment.min.js"></script>
-      <title>${it.resource.title}</title>
+      <title>${content.title}</title>
     </head>
 
     <body>
@@ -19,18 +19,18 @@
         </div>
         <div class="main">
             <div class="nav">
-                <div data-sly-test="${it.resource.nav}" data-sly-list="${it.resource.nav}">${item}</div>
+                <div data-sly-test="${content.nav}" data-sly-list="${content.nav}">${item}</div>
             </div>
             <div class="content">
                 <div class="content-body">
                     <div class="title">
-                        <h1>${it.resource.title}</h1>
-                        <div data-sly-test="${it.resource.committers && it.resource.lastModified}" class="author">
-                            <sly data-sly-list="${it.resource.committers}"><img title="${item.display}" src="${item.avatar_url}"></sly>
-                            <span class="lastModified">Last modified <time datetime="${it.resource.lastModified.raw}">${it.resource.lastModified.display}</time></span>
+                        <h1>${content.title}</h1>
+                        <div data-sly-test="${content.committers && content.lastModified}" class="author">
+                            <sly data-sly-list="${content.committers}"><img title="${item.display}" src="${item.avatar_url}"></sly>
+                            <span class="lastModified">Last modified <time datetime="${content.lastModified.raw}">${content.lastModified.display}</time></span>
                         </div>
                     </div>
-                    <div data-sly-list="${it.resource.children}">${item}</div>
+                    <div data-sly-list="${content.children}">${item}</div>
                 </div>
             </div>
         </div>

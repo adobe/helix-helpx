@@ -21,13 +21,7 @@
     "url": "https://github.com/adobe/helix-helpx/issues"
   },
   "homepage": "https://github.com/adobe/helix-helpx#readme",
-  "dependencies": {
-    "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.85",
-    "request": "^2.87.0",
-    "request-promise": "^4.2.2"
-  },
   "devDependencies": {
-    "@adobe/helix-cli": "^0.3.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.12.0",

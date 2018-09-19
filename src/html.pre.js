@@ -2,7 +2,7 @@ const request = require('request-promise');
 const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
 /**
- * Removes the first title from the resource children
+ * Removes the first title from the content children
  * @param Array children Children
  * @param {Object} logger Logger
  */
@@ -21,7 +21,7 @@ function removeFirstTitle(children, logger) {
  * @param String owner Owner
  * @param String repo Repo
  * @param String ref Ref
- * @param String path Path to the resource
+ * @param String path Path to the content
  * @param {Object} logger Logger
  */
 async function fetchCommitsHistory(apiRoot, owner, repo, ref, path, logger) {
@@ -163,19 +163,19 @@ async function pre(payload, action) {
   const { logger, secrets, request: actionReq } = action;
 
   try {
-    if (!payload.resource) {
-      logger.debug('html-pre.js - Payload has no resource, nothing we can do');
+    if (!payload.content) {
+      logger.debug('html-pre.js - Payload has no content, nothing we can do');
       return payload;
     }
 
     const p = payload;
 
-    // clean up the resource
-    p.resource.children = removeFirstTitle(p.resource.children, logger);
+    // clean up the content
+    p.content.children = removeFirstTitle(p.content.children, logger);
 
     // extract committers info and last modified based on commits history
     if (secrets.REPO_API_ROOT) {
-      p.resource.commits =
+      p.content.commits =
         await fetchCommitsHistory(
           secrets.REPO_API_ROOT,
           actionReq.params.owner,
@@ -184,8 +184,8 @@ async function pre(payload, action) {
           actionReq.params.path,
           logger,
         );
-      p.resource.committers = extractCommittersFromCommitsHistory(p.resource.commits, logger);
-      p.resource.lastModified = extractLastModifiedFromCommitsHistory(p.resource.commits, logger);
+      p.content.committers = extractCommittersFromCommitsHistory(p.content.commits, logger);
+      p.content.lastModified = extractLastModifiedFromCommitsHistory(p.content.commits, logger);
     } else {
       logger.debug('html-pre.js - No REPO_API_ROOT provided');
     }
@@ -199,7 +199,7 @@ async function pre(payload, action) {
           actionReq.params.ref,
           logger,
         );
-      p.resource.nav = extractNav(navPayload.resource.children, logger);
+      p.content.nav = extractNav(navPayload.content.children, logger);
     } else {
       logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
     }
