@@ -1,5 +1,7 @@
 # helix-helpx
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/adobe/helix-helpx.svg)](https://greenkeeper.io/)
+
 helix-helpx is the first web site rendered leveraging the [Helix](https://github.com/adobe/project-helix) platform and following the [hypermedia rendering pipepline](https://github.com/adobe/hypermedia-pipeline).
 
 ## Architecture
