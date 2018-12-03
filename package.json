@@ -31,5 +31,10 @@
     "mocha-junit-reporter": "^1.17.0",
     "nock": "^9.3.3",
     "sinon": "^6.0.1"
+  },
+  "dependencies": {
+    "@adobe/helix-pipeline": "^0.9.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
   }
 }

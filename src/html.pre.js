@@ -1,5 +1,15 @@
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 const request = require('request-promise');
-const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
 /**
  * Removes the first title from the content children
@@ -108,54 +118,6 @@ function extractLastModifiedFromCommitsHistory(commits, logger) {
   };
 }
 
-/**
- * Returns that nav items based on the nav children
- * @param Array navChildren Children of the nav
- * @param {Object} logger Logger
- */
-function extractNav(navChildren, logger) {
-  logger.debug('html-pre.js - Extracting nav');
-
-  if (navChildren) {
-    let nav = navChildren;
-
-    // remove first title
-    if (nav && nav.length > 0) {
-      nav = nav.slice(1);
-    }
-    nav = nav.map(element => element
-      .replace(new RegExp('href="', 'g'), 'href="/')
-      .replace(new RegExp('.md"', 'g'), '.html"'));
-
-    logger.debug('html-pre.js - Managed to collect some content for the nav');
-    return nav;
-  }
-
-  logger.debug('html-pre.js - Navigation payload has no children');
-  return [];
-}
-
-/**
- * Fetches the nav payload
- * @param String rawRoot Raw root url
- * @param String owner Owner
- * @param String repo Repo
- * @param String ref Ref
- * @param {Object} logger Logger
- */
-async function fetchNavPayload(owner, repo, ref, logger) {
-  logger.debug('html-pre.js - Fectching the nav');
-
-  const params = {
-    owner,
-    repo,
-    ref,
-    path: 'SUMMARY.md',
-  };
-
-  return pipe(null, {}, { request: { params }});
-}
-
 // module.exports.pre is a function (taking next as an argument)
 // that returns a function (with payload, config, logger as arguments)
 // that calls next (after modifying the payload a bit)
@@ -186,22 +148,9 @@ async function pre(payload, action) {
         );
       p.content.committers = extractCommittersFromCommitsHistory(p.content.commits, logger);
       p.content.lastModified = extractLastModifiedFromCommitsHistory(p.content.commits, logger);
+      p.content.nav = '/SUMMARY';
     } else {
       logger.debug('html-pre.js - No REPO_API_ROOT provided');
-    }
-
-    // fetch and inject the nav
-    if (secrets.REPO_RAW_ROOT) {
-      const navPayload =
-        await fetchNavPayload(
-          actionReq.params.owner,
-          actionReq.params.repo,
-          actionReq.params.ref,
-          logger,
-        );
-      p.content.nav = extractNav(navPayload.content.children, logger);
-    } else {
-      logger.debug('html-pre.js - No REPO_RAW_ROOT provided');
     }
 
     return p;
@@ -220,5 +169,3 @@ module.exports.removeFirstTitle = removeFirstTitle;
 module.exports.fetchCommitsHistory = fetchCommitsHistory;
 module.exports.extractCommittersFromCommitsHistory = extractCommittersFromCommitsHistory;
 module.exports.extractLastModifiedFromCommitsHistory = extractLastModifiedFromCommitsHistory;
-module.exports.fetchNavPayload = fetchNavPayload;
-module.exports.extractNav = extractNav;

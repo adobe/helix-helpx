@@ -127,29 +127,3 @@ describe('Testing extractLastModifiedFromCommitsHistory', () => {
     assert.equal(output.raw, '01 Jan 2018 00:01:00 GMT');
   });
 });
-
-describe('Testing fetchNavPayload', () => {
-  it('fectch nav', async () => {
-    nock('http://localhost').get('/owner/repo/ref/SUMMARY.md').reply(200, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
-
-    const navPayload = await defaultPre.fetchNavPayload('owner', 'repo', 'ref', { REPO_RAW_ROOT: 'http://localhost/' }, loggerMock);
-
-    assert.equal(navPayload.resource.body, '# Table of contents\n\n* a\n* b\n* [link](link.md)');
-    assert.equal(navPayload.resource.html, '<h1>Table of contents</h1>\n<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="link.md">link</a></li>\n</ul>');
-  });
-});
-
-describe('Testing extractNav', () => {
-  it('Collect nav', () => {
-    const output = defaultPre.extractNav(
-      [
-        '<h1>Table of contents</h1>',
-        '\n',
-        '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="link.md">link</a></li>\n</ul>',
-      ],
-      loggerMock,
-    );
-
-    assert.deepEqual(output, ['\n', '<ul>\n<li>a</li>\n<li>b</li>\n<li><a href="/link.html">link</a></li>\n</ul>']);
-  });
-});

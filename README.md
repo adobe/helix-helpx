@@ -1,6 +1,6 @@
 # helix-helpx
 
-helix-helpx is the first web site rendered leveraging the [Helix](https://github.com/adobe/project-helix) platform and following the [hypermedia rendering pipepline](https://github.com/adobe/hypermedia-pipeline).
+helix-helpx is the first web site rendered leveraging the [Helix](https://github.com/adobe/project-helix) platform and leveraging the [Helix Pipepline](https://github.com/adobe/helix-pipeline).
 
 ## Architecture
 
@@ -9,7 +9,7 @@ The content to render is defined in the [helix-config.yaml](./helix-config.yaml)
 The code is composed of
 
 * [html.htl](./src/html.htl): the main htl template
-* [html.pre.js](./src/html.pre.js): a [pre.js](https://github.com/adobe/hypermedia-pipeline#optional-the-wrapper-function) wrapper function that enhanced the payload to cover the needs of the htl template.
+* [html.pre.js](./src/html.pre.js): a [pre.js](https://github.com/adobe/helix-pipeline#optional-the-wrapper-function) wrapper function that enhanced the payload to cover the needs of the htl template.
 * some static content (css, image) for the need of the website
 
 ## Run

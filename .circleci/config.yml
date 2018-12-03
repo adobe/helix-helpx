@@ -29,16 +29,19 @@ jobs:
             name: Building Templates
             command: npx hlx build
 
-        - run: git diff
+        - run: git --no-pager diff
 
-        - run:
-            name: Deploying to Adobe I/O Runtime
-            command: npx hlx deploy --no-auto
+# Fails due to missing argument: --circleci-auth
+#        - run:
+#            name: Deploying to Adobe I/O Runtime
+#            command: npx hlx deploy
 
-        - run:
-            name: Activate CDN
-            command: npx hlx strain
+# Fails due to missing file '/home/circleci/project/.hlx/strains.json'
+#        - run:
+#            name: Activate CDN
+#            command: npx hlx strain
 
-        - run:
-            name: Test Performance
-            command: npx hlx perf
+# Fails due to missing required argument: caliber-auth
+#        - run:
+#            name: Test Performance
+#            command: npx hlx perf
