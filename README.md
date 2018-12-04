@@ -22,6 +22,7 @@ Run:
 #!/bin/bash
 git clone https://github.com/adobe/helix-helpx.git
 cd helix-helpx
+npm install
 hlx up
 ```
 
