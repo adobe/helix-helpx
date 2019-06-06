@@ -133,7 +133,8 @@ async function pre(payload, action) {
     const p = payload;
 
     // clean up the content
-    p.content.children = removeFirstTitle(p.content.children, logger);
+    // TODO: re-implement removeFirstTitle without p.content.children
+    // p.content.children = removeFirstTitle(p.content.children, logger);
 
     // extract committers info and last modified based on commits history
     if (secrets.REPO_API_ROOT) {
